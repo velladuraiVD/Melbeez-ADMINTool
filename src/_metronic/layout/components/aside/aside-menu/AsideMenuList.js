@@ -144,6 +144,52 @@ export function AsideMenuList({ layoutProps }) {
           </>
           }
         </li>
+
+
+        <li
+          className={`menu-item menu-item-submenu ${getMenuItemActive(
+            "/UserManange",
+            true
+          )}`}
+          aria-haspopup="true"
+          data-menu-toggle="hover"
+        >
+          <NavLink className="menu-link menu-toggle" to="/UserManange">
+            <span className="svg-icon menu-icon">
+              <SVG src={toAbsoluteUrl("/media/svg/icons/General/warrenty3.svg")} />
+            </span>
+            <span className="menu-text">Warrenty Product info</span>
+            <i className="menu-arrow" />
+          </NavLink>
+          
+
+          
+          {isSuperAdmin && 
+          <>
+          
+
+
+
+          <div className="menu-submenu">
+            <i className="menu-arrow" />
+            <ul className="menu-subnav">
+              <li
+                className={`menu-item ${getMenuItemActive("/warrenty")}`}
+                aria-haspopup="true"
+              >
+               <NavLink className="menu-link" to="/warrenty">
+                  <i className="menu-bullet menu-bullet-dot">
+                    <span />
+                  </i>
+                  <span className="menu-text">All Warranties</span>
+                </NavLink>
+              </li>
+            </ul>
+          </div>
+          </>
+          }
+        </li>
+
         
         <li
           className={`menu-item menu-item-submenu ${getMenuItemActive(
@@ -401,6 +447,7 @@ export function AsideMenuList({ layoutProps }) {
             <span className="menu-text">System Maintenance</span>
           </NavLink>
         </li>
+        
 
         <li
           className={`menu-item ${getMenuItemActive("/feed")}`}

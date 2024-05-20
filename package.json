@@ -101,6 +101,7 @@
         "redux-saga": "1.1.3",
         "socicon": "3.0.5",
         "use-search-params": "^1.0.4",
+        "xlsx": "^0.18.5",
         "yup": "0.29.0"
     },
     "devDependencies": {
