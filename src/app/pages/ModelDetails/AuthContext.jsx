@@ -1,7 +1,6 @@
-// AuthProvider.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authUserDetail } from '../../services/ProfileService';
-import { showSuccessToast, showErrorToast, showWarnToast } from '../../../Utility/toastMsg'; 
+import { showSuccessToast, showErrorToast, showWarnToast } from '../../../Utility/toastMsg';
 
 const AuthContext = createContext();
 
@@ -12,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -51,14 +51,14 @@ export const AuthProvider = ({ children }) => {
       showWarnToast('Please fill in all required fields.');
       return;
     }
-  
+
     if (!formData.file && !formData.description) {
       setMessage('Please provide either an image or a description.');
       showWarnToast('Please provide either an image or a description.');
       setShow(true)
       return;
     }
-  
+
     const form = new FormData();
     form.append('author', formData.author);
     if (formData.file) {
@@ -70,13 +70,13 @@ export const AuthProvider = ({ children }) => {
     if (userDetails) {
       form.append('userId', userDetails.result.id);
     }
-  
+
     try {
       const response = await fetch('http://192.168.1.9:8083/upload', {
         method: 'POST',
         body: form,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || 'Unknown error occurred.';
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
         showErrorToast(errorMessage);
         return;
       }
-  
+
       showSuccessToast('Upload successful');
       setFormData({
         author: '',
@@ -103,6 +103,7 @@ export const AuthProvider = ({ children }) => {
       setShow(true);
     }
   };
+  
   const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(`http://192.168.1.9:8083/feeds/id/${postId}`, {
@@ -120,8 +121,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleLikePost = async (postId) => {
+    try {
+      const response = await fetch(`http://192.168.1.9:8083/feeds/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: userDetails?.result.id }),
+        
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        showWarnToast(errorData.message || 'Failed to like post');
+        return;
+      }
+
+      const data = await response.json();
+
+      setPostData((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, likes: data.likes } : post
+        )
+      );
+      setLikedPosts([...likedPosts, postId]);
+      showSuccessToast('Post liked successfully');
+    } catch (error) {
+      showErrorToast("Error liking post: " + error.message);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ userDetails, loading, error, handleUpload, postData, fetchFeeds, handleDeletePost }}>
+    <AuthContext.Provider value={{ userDetails, loading, error, handleUpload, postData, fetchFeeds, handleDeletePost, handleLikePost }}>
       {children}
     </AuthContext.Provider>
   );
