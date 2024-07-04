@@ -85,7 +85,11 @@ export function AsideMenuList({ layoutProps }) {
         >
           <NavLink className="menu-link menu-toggle" to="/UserManange">
             <span className="svg-icon menu-icon">
-              <SVG src={toAbsoluteUrl("/media/svg/icons/General/Expand-arrows.svg")} />
+              <SVG
+                src={toAbsoluteUrl(
+                  "/media/svg/icons/General/Expand-arrows.svg"
+                )}
+              />
             </span>
             <span className="menu-text">Product Model Info</span>
             <i className="menu-arrow" />
@@ -114,7 +118,7 @@ export function AsideMenuList({ layoutProps }) {
                 className={`menu-item ${getMenuItemActive("/product-queue")}`}
                 aria-haspopup="true"
               >
-               <NavLink className="menu-link" to="/product-queue">
+                <NavLink className="menu-link" to="/product-queue">
                   <i className="menu-bullet menu-bullet-dot">
                     <span />
                   </i>
@@ -123,28 +127,69 @@ export function AsideMenuList({ layoutProps }) {
               </li>
             </ul>
           </div>
-          {isSuperAdmin && 
-          <>
-          <div className="menu-submenu">
-            <i className="menu-arrow" />
-            <ul className="menu-subnav">
-              <li
-                className={`menu-item ${getMenuItemActive("/approval-pending-table")}`}
-                aria-haspopup="true"
-              >
-               <NavLink className="menu-link" to="/approval-pending-table">
-                  <i className="menu-bullet menu-bullet-dot">
-                    <span />
-                  </i>
-                  <span className="menu-text">Pending Approval</span>
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-          </>
-          }
+          {isSuperAdmin && (
+            <>
+              <div className="menu-submenu">
+                <i className="menu-arrow" />
+                <ul className="menu-subnav">
+                  <li
+                    className={`menu-item ${getMenuItemActive(
+                      "/approval-pending-table"
+                    )}`}
+                    aria-haspopup="true"
+                  >
+                    <NavLink className="menu-link" to="/approval-pending-table">
+                      <i className="menu-bullet menu-bullet-dot">
+                        <span />
+                      </i>
+                      <span className="menu-text">Pending Approval</span>
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+            </>
+          )}
         </li>
-        
+
+        <li
+          className={`menu-item menu-item-submenu ${getMenuItemActive(
+            "/UserManange",
+            true
+          )}`}
+          aria-haspopup="true"
+          data-menu-toggle="hover"
+        >
+          <NavLink className="menu-link menu-toggle" to="/UserManange">
+            <span className="svg-icon menu-icon">
+              <SVG
+                src={toAbsoluteUrl("/media/svg/icons/General/warrenty3.svg")}
+              />
+            </span>
+            <span className="menu-text">Warrenty Product info</span>
+            <i className="menu-arrow" />
+          </NavLink>
+          {isSuperAdmin && (
+            <>
+              <div className="menu-submenu">
+                <i className="menu-arrow" />
+                <ul className="menu-subnav">
+                  <li
+                    className={`menu-item ${getMenuItemActive("/warrenty")}`}
+                    aria-haspopup="true"
+                  >
+                    <NavLink className="menu-link" to="/warrenty">
+                      <i className="menu-bullet menu-bullet-dot">
+                        <span />
+                      </i>
+                      <span className="menu-text">All Warranties</span>
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+            </>
+          )}
+        </li>
+
         <li
           className={`menu-item menu-item-submenu ${getMenuItemActive(
             "/UserManange",
@@ -408,9 +453,7 @@ export function AsideMenuList({ layoutProps }) {
         >
           <NavLink className="menu-link menu-toggle" to="/feed">
             <span className="svg-icon menu-icon">
-              <SVG
-                src={toAbsoluteUrl("/media/svg/icons/General/Feed.svg")}
-              />
+              <SVG src={toAbsoluteUrl("/media/svg/icons/General/Feed.svg")} />
             </span>
             <span className="menu-text">Admin feed</span>
           </NavLink>
