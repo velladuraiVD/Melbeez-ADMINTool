@@ -2,27 +2,20 @@ import React, { useEffect, useState } from "react";
 import Card from "react-bootstrap/Card";
 import { toAbsoluteUrl } from "../../../_metronic/_helpers";
 import SVG from "react-inlinesvg";
+// eslint-disable-next-line no-restricted-imports
 import Modal from "react-bootstrap/Modal";
+// eslint-disable-next-line no-restricted-imports
 import Form from "react-bootstrap/Form";
+// eslint-disable-next-line no-restricted-imports
 import Button from "react-bootstrap/Button";
-import {
-  FaWhatsapp,
-  FaEnvelope,
-  FaTelegram,
-  FaInstagram,
-  FaFacebook,
-} from "react-icons/fa";
-import { useAuth } from "./AuthContext"; // Adjust the path accordingly
+import {FaWhatsapp, FaEnvelope,FaTelegram,FaInstagram,FaFacebook,} from "react-icons/fa";
+import { useAuth } from "./AuthContext";
 import "../ModelDetails/FeedCard.css";
 
 const CardHeader = ({ author, postAge }) => (
   <div className="card-header-custom">
     <div className="header-left">
-      <img
-        src={toAbsoluteUrl("/media/users/300_21.jpg")}
-        alt="Avatar"
-        className="avatar"
-      />
+      <img src={toAbsoluteUrl("/media/users/300_21.jpg")} alt="Avatar" className="avatar" />
       <h6>{author}</h6>
     </div>
     <div>
@@ -75,7 +68,7 @@ function FeedCard() {
   };
 
   const handleShareWhatsApp = (post) => {
-    const message = `Check out this post: ${post.link}`;
+    const message = `Check out this post: ${post.image}`;
     const url = `whatsapp://send?text=${encodeURIComponent(message)}`;
     window.location.href = url;
   };
@@ -128,7 +121,7 @@ function FeedCard() {
   return (
     <div className="feed-card-container">
       {postData.map((post) => (
-        <Card key={post.id} className="feed-card">
+        <Card key={post._id} className="feed-card">
           <Card.Header>
             <CardHeader
               author={post.author}
@@ -138,9 +131,11 @@ function FeedCard() {
           <Card.Img
             className="post-img"
             variant="top"
-            src={post.link}
+            src={post.image}
             alt="Post"
           />
+
+     
           <Card.Body>
             <Card.Text>{post.description}</Card.Text>
           </Card.Body>
