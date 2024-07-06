@@ -134,6 +134,123 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleUploadwarrenty = async (
+    formData,
+    setMessage,
+    setFormData,
+    setShow
+  ) => {
+    // Check required fields
+    if (
+      !formData.vendor ||
+      !formData.productName ||
+      !formData.monthlyPrice ||
+      !formData.annualPrice
+    ) {
+      setMessage("Please fill in all required fields.");
+      showWarnToast("Please fill in all required fields.");
+      return;
+    }
+
+    // Create JSON payload
+    const payload = {
+      warrantyId: formData.warrantyId,
+      status: formData.status,
+      vendor: formData.vendor,
+      productName: formData.productName,
+      monthlyPrice: formData.monthlyPrice,
+      annualPrice: formData.annualPrice,
+      discount: formData.discount,
+      terms_conditions: formData.terms_conditions,
+      created_by: formData.created_by,
+      updated_by: formData.updated_by,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/warranty/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.error || "Unknown error occurred.";
+        setMessage(errorMessage);
+        showErrorToast(errorMessage);
+        return;
+      }
+
+      // showSuccessToast("Upload successful");
+      setFormData({
+        warrantyId: "",
+        status: "",
+        vendor: "",
+        productName: "",
+        monthlyPrice: "",
+        annualPrice: "",
+        discount: "",
+        terms_conditions: "",
+        created_by: "",
+        updated_by: "",
+      });
+      setShow(false);
+    } catch (error) {
+      const errorMessage = "Error uploading file: " + error.message;
+      showErrorToast(errorMessage);
+      setMessage(errorMessage);
+      console.error(errorMessage);
+      setShow(true);
+    }
+  };
+
+  const handleUpdateWarranty = async (formData) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/warranty/${formData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update warranty.");
+      }
+
+      return response.json(); // Optionally return data or handle success
+    } catch (error) {
+      throw new Error(error.message); // Throw error to be caught by the calling component
+    }
+  };
+
+  const handleDeleteWarranty = async (warrantyId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/warrenty/${warrantyId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete warranty");
+      }
+
+      setPostData((prevPosts) =>
+        prevPosts.filter((post) => post.id !== warrantyId)
+      );
+      showSuccessToast("Warranty deleted successfully");
+    } catch (error) {
+      showErrorToast("Error deleting warranty: " + error.message);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -144,6 +261,9 @@ export const AuthProvider = ({ children }) => {
         postData,
         fetchFeeds,
         handleDeletePost,
+        handleUploadwarrenty,
+        handleUpdateWarranty,
+        handleDeleteWarranty,
       }}
     >
       {children}

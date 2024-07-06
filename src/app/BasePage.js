@@ -27,25 +27,22 @@ import ApprovalPendingTable from "./pages/ModelDetails/ApprovalPendingTable";
 import ProductQueueTable from "./pages/ModelDetails/ProductQueueTable";
 import BulkUpload from "./pages/ModelDetails/BulkUpload";
 import Feed from "./pages/ModelDetails/Feed";
+import Warrenty from "./pages/ModelDetails/Warranty";
 
 const UserProfilepage = lazy(() =>
   import("./modules/UserProfile/UserProfilePage")
 );
-
 export default function BasePage() {
   const [show, setShow] = useState(false);
-
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [RoleRoute, setRoleRoute] = useState("");
-
   const handleAPIRefresh = () => {
     setInterval(() => {
       var obj = {
         token: localStorage.getItem("authToken"),
         refreshToken: localStorage.getItem("refToken"),
       };
-
       const reqoption = {
         method: "POST",
         headers: {
@@ -73,7 +70,6 @@ export default function BasePage() {
   useEffect(() => {
     handleAPIRefresh();
   }, []);
-
   useEffect(() => {
     setTimeout(() => {
       let authToken = localStorage.getItem("authToken");
@@ -119,7 +115,6 @@ export default function BasePage() {
         });
     }, 1000);
   }, []);
-
   return (
     <>
       <Suspense fallback={<LayoutSplashScreen />}>
@@ -141,13 +136,16 @@ export default function BasePage() {
           <Route path="/activitylog" component={ActivityLogs} />
           <Route path="/model-details" component={AllData} />
           <Route path="/feed" component={Feed} />
-          <Route path="/product-queue" component={ProductQueueTable} /> 
-          <Route path="/approval-pending-table" component={ApprovalPendingTable} /> 
-          <Route path="/bulk-upload" component={BulkUpload} /> 
+          <Route path="/warrenty" component={Warrenty} />
+          <Route path="/product-queue" component={ProductQueueTable} />
+          <Route
+            path="/approval-pending-table"
+            component={ApprovalPendingTable}
+          />
+          <Route path="/bulk-upload" component={BulkUpload} />
         </Switch>
       </Suspense>
       <Switch>{RoleRoute}</Switch>
-
       <Modal show={show}>
         <Modal.Body> Your Session Has Ended Please Login Again </Modal.Body>
         <Modal.Footer>
@@ -155,7 +153,7 @@ export default function BasePage() {
             to="/logout"
             className="btn btn-light-primary font-weight-bold"
             style={{
-              backgroundColor: "#facd21",
+              backgroundColor: "#FACD21",
               color: "black",
             }}
           >
