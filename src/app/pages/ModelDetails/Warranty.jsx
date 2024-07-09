@@ -8,7 +8,7 @@ export default function Warrenty() {
       <AuthProvider>
         <WarrantyProductQueueTable
           status={""}
-          title={"All Product"}
+          title={"All Warranty"}
           screen="ALL_DATA"
         />
       </AuthProvider>

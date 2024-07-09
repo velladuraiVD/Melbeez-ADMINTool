@@ -1,125 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
-import SVG from "react-inlinesvg";
+import { Button, Container } from "react-bootstrap";
+import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
+import { useAuth } from "./AuthContext";
+import "../ModelDetails/Warranty.css";
+import StatusDot from "./StatusDot";
+import WarrantyTable from "./WarrantyTable";
+import AddEditModal from "./AddEditModel";
+import DeleteConfirmationModal from "./DeleteModel";
+
+import { headerSortingClasses } from "../../../_metronic/_helpers";
 import {
   Card,
   CardBody,
   CardHeader,
   CardHeaderToolbar,
 } from "../../../_metronic/_partials/controls";
-import { Button, Modal, Form, Table } from "react-bootstrap";
 import * as XLSX from "xlsx";
-import { TablePagination } from "@material-ui/core";
-import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
-import { useAuth } from "./AuthContext";
-import axios from "axios";
-import {
-  headerSortingClasses,
-  toAbsoluteUrl,
-} from "../../../_metronic/_helpers";
-
-const renderActions = (row, handleEdit, handleDelete) => (
-  <>
-    <a
-      href="#"
-      title="Edit"
-      className="btn btn-icon btn-light btn-hover-primary btn-sm mx-1"
-      onClick={(e) => {
-        e.preventDefault();
-        handleEdit(row.warrantyId);
-      }}
-    >
-      <span className="svg-icon svg-icon-md svg-icon-primary">
-        <SVG src={toAbsoluteUrl("/media/svg/icons/Communication/Write.svg")} />
-      </span>
-    </a>
-    <a
-      href="#"
-      title="Delete"
-      className="btn btn-icon btn-light btn-hover-danger btn-sm mr-2"
-      onClick={(e) => {
-        e.preventDefault();
-        handleDelete(row.id);
-      }}
-    >
-      <span className="svg-icon svg-icon-md svg-icon-danger">
-        <SVG src={toAbsoluteUrl("/media/svg/icons/General/Trash.svg")} />
-      </span>
-    </a>
-  </>
-);
-
-const columns = [
-  {
-    dataField: "vendor",
-    text: "Vendor",
-    headerSortingClasses,
-  },
-  {
-    dataField: "warrantyId",
-    text: "Warranty ID",
-    headerSortingClasses,
-  },
-  {
-    dataField: "productName",
-    text: "Product Name",
-    headerSortingClasses,
-  },
-  {
-    dataField: "monthlyPrice",
-    text: "Monthly Price",
-    headerSortingClasses,
-  },
-  {
-    dataField: "annualPrice",
-    text: "Annual Price",
-    headerSortingClasses,
-  },
-  {
-    dataField: "discount",
-    text: "Melbeez Discount",
-    headerSortingClasses,
-  },
-  {
-    dataField: "terms_conditions",
-    text: "Terms",
-    headerSortingClasses,
-  },
-  {
-    dataField: "created_by",
-    text: "Created By",
-    headerSortingClasses,
-  },
-  {
-    dataField: "updated_by",
-    text: "Updated By",
-    headerSortingClasses,
-  },
-  {
-    dataField: "updatedAt",
-    text: "Last Updated",
-    headerSortingClasses,
-    formatter: (cell, row) => {
-      // Assuming updatedAt is a string in the format "YYYY-MM-DDTHH:mm:ss.sssZ"
-      const datePart = cell.slice(0, 10); // Extract date part only
-      return datePart;
-    },
-  },
-  {
-    dataField: "status",
-    text: "Status",
-    headerSortingClasses,
-  },
-  {
-    dataField: "actions",
-    text: "Actions",
-    formatter: (cell, row) => renderActions(row),
-    classes: "text-center pr-0",
-    headerClasses: "text-center pr-3",
-    style: {
-      minWidth: "100px",
-    },
-  },
-];
+import AddUpload from "./Uploadmodel";
 
 const WarrantyProductQueueTable = ({
   status = 0,
@@ -127,37 +24,94 @@ const WarrantyProductQueueTable = ({
   screen = "",
   isApproved = false,
 }) => {
-  const searchInputRef = useRef();
-  const { handleUploadwarrenty, handleUpdateWarranty, getWarranty } = useAuth();
-  const [show, setShow] = useState(false);
-  const [deleteShow, setDeleteShow] = useState(false);
+  const [warrantyData, setWarrantyData] = useState([]);
+  const [columns] = useState([
+    { dataField: "warrantyId", text: "Warranty ID", headerSortingClasses },
+    { dataField: "vendor", text: "Vendor", headerSortingClasses },
+    { dataField: "productName", text: "Product Name", headerSortingClasses },
+    {
+      dataField: "monthlyPrice",
+      text: "Monthly Price",
+      headerSortingClasses,
+      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
+    },
+    {
+      dataField: "annualPrice",
+      text: "Annual Price",
+      headerSortingClasses,
+      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
+    },
+    {
+      dataField: "discount",
+      text: "Discount",
+      headerSortingClasses,
+      formatter: (cell) => `${parseFloat(cell)}%`,
+    },
+    {
+      dataField: "status",
+      text: "Status",
+      headerSortingClasses,
+      formatter: (cell) => <StatusDot status={cell} />,
+    },
+    { dataField: "terms_conditions", text: "T & C" },
+    {
+      dataField: "created_by",
+      text: "Created By",
+      headerSortingClasses,
+    },
+    {
+      dataField: "updated_by",
+      text: "Updated By",
+      formatter: (cell) => cell || "N/A",
+      headerSortingClasses,
+    },
+    {
+      dataField: "updatedAt",
+      text: "Last Updated",
+      headerSortingClasses,
+      formatter: (cell) => {
+        const date = new Date(cell);
+        const formattedDate = date.toLocaleDateString();
+        return `${formattedDate}`;
+      },
+    },
+    { dataField: "actions", text: "Actions" },
+  ]);
+
+  const searchInputRefs = useRef(columns.map(() => React.createRef()));
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [rowData, setRowData] = useState(null);
-  const [search, setSearch] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
   const [data, setData] = useState([]);
+  const [showAddEditModal, setShowAddEditModal] = useState(false);
+  const [showAddModel, setShowAddModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
-    status: "pending",
+    id: "",
     warrantyId: "",
     vendor: "",
     productName: "",
     monthlyPrice: "",
     annualPrice: "",
     discount: "",
+    status: "",
     terms_conditions: "",
     created_by: "",
     updated_by: "",
   });
-
-  const [message, setMessage] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchTerms, setSearchTerms] = useState({});
+  const [commonSearchTerm, setCommonSearchTerm] = useState("");
+  const {
+    userDetails,
+    loading,
+    handleUploadwarrenty,
+    handleUpdateWarranty,
+  } = useAuth();
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  const { userDetails, loading, handleUpload } = useAuth();
 
   useEffect(() => {
     if (!loading && userDetails && !formData.author) {
@@ -172,16 +126,24 @@ const WarrantyProductQueueTable = ({
 
   const fetchData = async () => {
     try {
-      const response = await fetch("http://localhost:8080/warranty/all");
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/all`
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      setData(data);
+      setWarrantyData(data);
       setFilteredData(data);
+      setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };
+
+  const handleDeleteConfirmation = (row) => {
+    setRowData(row);
+    setShowDeleteModal(true);
   };
 
   const handleEdit = (row) => {
@@ -198,21 +160,14 @@ const WarrantyProductQueueTable = ({
       created_by: row.created_by,
       updated_by: row.updated_by,
     });
-    setShow(true);
-  };
-
-  const handleDeleteConfirmation = (row) => {
-    setRowData(row);
-    setDeleteShow(true);
+    setShowAddEditModal(true);
   };
 
   const handleDelete = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/warranty/${rowData.id}`,
-        {
-          method: "DELETE",
-        }
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/${rowData.id}`,
+        { method: "DELETE" }
       );
       if (!response.ok) {
         throw new Error("Failed to delete item.");
@@ -225,7 +180,7 @@ const WarrantyProductQueueTable = ({
       console.error("Error deleting item:", error);
       showErrorToast("Error deleting item.");
     } finally {
-      setDeleteShow(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -238,15 +193,16 @@ const WarrantyProductQueueTable = ({
     e.preventDefault();
     try {
       if (formData.id) {
-        await handleUpdateWarranty(formData, setMessage, setFormData, setShow);
+        await handleUpdateWarranty(formData);
         showSuccessToast("Item updated successfully.");
-        setShow(false);
-        setFormData({}); // Reset formData
       } else {
-        await handleUploadwarrenty(formData, setMessage, setFormData, setShow);
+        await handleUploadwarrenty(formData);
         showSuccessToast("Item added successfully.");
       }
-      fetchData(); // Refresh data after add/update
+      setFormData({});
+      fetchData();
+      setShowAddModal(false);
+      setShowAddEditModal(false);
     } catch (error) {
       console.error("Error handling warranty:", error);
       showErrorToast("Error handling warranty.");
@@ -256,16 +212,27 @@ const WarrantyProductQueueTable = ({
   const handleFilter = (e) => {
     const filterValue = e.target.value;
     if (filterValue === "") {
-      setFilteredData(data);
+      setFilteredData(warrantyData);
     } else {
-      const filtered = data.filter((item) => item.status === filterValue);
+      const filtered = warrantyData.filter(
+        (item) => item.status === filterValue
+      );
       setFilteredData(filtered);
     }
   };
 
   const exportToExcel = () => {
     try {
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      // Ensure data is not empty
+      if (!data || data.length === 0) {
+        showErrorToast("No data to export.");
+        return;
+      }
+
+      // Filter out the 'id' field from each object in data
+      const filteredData = data.map(({ id, ...rest }) => rest);
+
+      const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
       XLSX.writeFile(workbook, "warranty_data.xlsx");
@@ -276,65 +243,41 @@ const WarrantyProductQueueTable = ({
     }
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e, column) => {
     const searchValue = e.target.value.toLowerCase();
-    setSearch(searchValue);
-    const filtered = data.filter(
-      (item) =>
-        item.vendor.toLowerCase().includes(searchValue) ||
-        item.productName.toLowerCase().includes(searchValue) ||
-        item.status.toLowerCase().includes(searchValue)
+    setSearchTerms((prevSearchTerms) => ({
+      ...prevSearchTerms,
+      [column.dataField]: searchValue,
+    }));
+
+    const filtered = warrantyData.filter((item) =>
+      Object.entries(searchTerms).every(([key, value]) =>
+        String(item[key])
+          .toLowerCase()
+          .includes(value)
+      )
     );
+
     setFilteredData(filtered);
   };
 
-  const renderActions = (row) => (
-    <>
-      <a
-        href="#"
-        title="Edit"
-        className="btn btn-icon btn-light btn-hover-primary btn-sm mx-1"
-        onClick={(e) => {
-          e.preventDefault();
-          handleEdit(row);
-        }}
-      >
-        <span className="svg-icon svg-icon-md svg-icon-primary">
-          <SVG
-            src={toAbsoluteUrl("/media/svg/icons/Communication/Write.svg")}
-          />
-        </span>
-      </a>
-      <a
-        href="#"
-        title="Delete"
-        className="btn btn-icon btn-light btn-hover-danger btn-sm mr-2"
-        onClick={(e) => {
-          e.preventDefault();
-          handleDeleteConfirmation(row);
-        }}
-      >
-        <span className="svg-icon svg-icon-md svg-icon-danger">
-          <SVG src={toAbsoluteUrl("/media/svg/icons/General/Trash.svg")} />
-        </span>
-      </a>
-    </>
-  );
+  const handleCommonSearchChange = (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    setCommonSearchTerm(searchValue);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+    const filtered = warrantyData.filter((item) =>
+      columns.some((column) =>
+        String(item[column.dataField])
+          .toLowerCase()
+          .includes(searchValue)
+      )
+    );
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const columnsWithActions = columns.map((column) =>
-    column.dataField === "actions"
-      ? { ...column, formatter: (cell, row) => renderActions(row) }
-      : column
-  );
+    setFilteredData(filtered);
+  };
 
   return (
-    <>
+    <Container>
       <Card>
         <CardHeader title={title}>
           <CardHeaderToolbar>
@@ -358,7 +301,6 @@ const WarrantyProductQueueTable = ({
                   Filter by status
                 </option>
                 <option value="Pending">Pending</option>
-
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
@@ -368,10 +310,9 @@ const WarrantyProductQueueTable = ({
                 <input
                   type="search"
                   className="form-control"
-                  placeholder="Search..."
-                  onChange={handleSearchChange}
-                  ref={searchInputRef}
-                  value={search}
+                  placeholder="Search all warranty..."
+                  onChange={handleCommonSearchChange}
+                  value={commonSearchTerm}
                 />
               </div>
               <div>
@@ -383,8 +324,12 @@ const WarrantyProductQueueTable = ({
                   <i className="fas fa-search"></i>
                 </button>
               </div>
+            </div>
+            <div className="d-flex">
               <div>
-                <Button onClick={() => setShow(true)}>Add Warranty</Button>
+                <Button onClick={() => setShowAddModal(true)}>
+                  Add Warranty
+                </Button>
               </div>
               <div>
                 <button
@@ -400,280 +345,43 @@ const WarrantyProductQueueTable = ({
           </CardHeaderToolbar>
         </CardHeader>
         <CardBody style={{ justifyContent: "center" }}>
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                {columnsWithActions.map((column, index) => (
-                  <th key={index}>{column.text}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((item, index) => (
-                <tr key={index}>
-                  {columnsWithActions.map((column, columnIndex) => (
-                    <td key={columnIndex}>
-                      {column.formatter
-                        ? column.formatter(item[column.dataField], item)
-                        : item[column.dataField]}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          <TablePagination
+          <WarrantyTable
+            columns={columns}
+            data={filteredData}
+            currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            totalItems={data.length}
-            paginate={paginate}
+            handleEdit={handleEdit}
+            handleDelete={handleDeleteConfirmation}
+            paginate={setCurrentPage}
+            searchInputRefs={searchInputRefs}
+            handleSearchChange={handleSearchChange}
+          />
+          <AddUpload
+            setFormData={setFormData}
+            show={showAddModel}
+            onHide={() => setShowAddModal(false)}
+            formData={formData}
+            handleSubmit={handleSubmit}
+            handleInputChange={handleInputChange}
+          />
+          <AddEditModal
+            setFormData={setFormData}
+            show={showAddEditModal}
+            onHide={() => setShowAddEditModal(false)}
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleSubmit={handleSubmit}
+          />
+          <DeleteConfirmationModal
+            show={showDeleteModal}
+            onHide={() => setShowDeleteModal(false)}
+            onDelete={handleDelete}
+            rowData={rowData}
           />
         </CardBody>
       </Card>
-
-      {/* Add/Edit Modal */}
-      <Modal
-        show={show}
-        onHide={() => setShow(false)}
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {formData.id ? "Edit Warranty Product" : "Add Warranty Product"}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Group controlId="warrantyId">
-                <Form.Label>Warranty ID</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="warrantyId"
-                  value={formData.warrantyId}
-                  onChange={handleInputChange}
-                  //   required
-                />
-              </Form.Group>
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>Vendor Name</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Vendor Name"
-                name="vendor"
-                className="mb-3"
-                required
-                value={formData.vendor}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>Product Name</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Product Name"
-                name="productName"
-                className="mb-3"
-                required
-                value={formData.productName}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>Monthly Price</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Monthly Price"
-                name="monthlyPrice"
-                className="mb-3"
-                required
-                value={formData.monthlyPrice}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>Annual Price</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Annual Price"
-                name="annualPrice"
-                className="mb-3"
-                required
-                value={formData.annualPrice}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>Discount</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Discount"
-                name="discount"
-                className="mb-3"
-                required
-                value={formData.discount}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Group controlId="status">
-                <Form.Label>Status</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  required
-                >
-                  {/* <option value="Pending">Pending</option> */}
-                  <option value="select">select</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </Form.Control>
-              </Form.Group>
-            </div>
-            <div>
-              <Form.Label>Terms and Conditions</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="terms_conditions"
-                className="mb-3"
-                value={formData.terms_conditions}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            {formData.id ? (
-              <div
-                style={{
-                  display: "inline-block",
-                  width: "48%",
-                  marginRight: "8px",
-                }}
-              >
-                <Form.Label>Updated By</Form.Label>
-                <Form.Control
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Updated By"
-                  name="updated_by"
-                  className="mb-3"
-                  value={formData.updated_by}
-                  onChange={handleInputChange}
-                />
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "inline-block",
-                  width: "48%",
-                  marginRight: "8px",
-                }}
-              >
-                <Form.Label>Created By</Form.Label>
-                <Form.Control
-                  type="text"
-                  autoComplete="off"
-                  placeholder="Created By"
-                  name="created_by"
-                  className="mb-3"
-                  value={formData.created_by}
-                  onChange={handleInputChange}
-                />
-              </div>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button type="submit" variant="primary">
-              Save
-            </Button>
-            <Button
-              onClick={() => {
-                setShow(false);
-                setFormData({});
-              }}
-              variant="secondary"
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Delete Modal */}
-      <Modal
-        show={deleteShow}
-        onHide={() => setDeleteShow(false)}
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirmation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Are you sure you want to delete this item?</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={handleDelete} variant="danger">
-            Delete
-          </Button>
-          <Button onClick={() => setDeleteShow(false)} variant="secondary">
-            Cancel
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    </Container>
   );
 };
+
 export default WarrantyProductQueueTable;

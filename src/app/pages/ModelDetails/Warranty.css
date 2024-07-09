@@ -1,0 +1,8 @@
+.dot-green { background-color: green; }
+.dot-yellow { background-color: yellow; }
+.dot-red { background-color: red; }
+.text-green { color: green; }
+.text-yellow { color: orange; }
+.text-red { color: red; }
+.status-dot { width: 10px; height: 10px; display: inline-block; border-radius: 50%; margin-right: 5px; }
+.status-text { display: inline-block; }
