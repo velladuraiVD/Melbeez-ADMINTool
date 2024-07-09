@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -142,10 +143,14 @@ export const AuthProvider = ({ children }) => {
   ) => {
     // Check required fields
     if (
+      // !formData.warrantyId||
       !formData.vendor ||
       !formData.productName ||
       !formData.monthlyPrice ||
-      !formData.annualPrice
+      !formData.annualPrice ||
+      !formData.discount ||
+      !formData.terms_conditions ||
+      !formData.status
     ) {
       setMessage("Please fill in all required fields.");
       showWarnToast("Please fill in all required fields.");
@@ -154,7 +159,7 @@ export const AuthProvider = ({ children }) => {
 
     // Create JSON payload
     const payload = {
-      warrantyId: formData.warrantyId,
+      // warrantyId: formData.warrantyId,
       status: formData.status,
       vendor: formData.vendor,
       productName: formData.productName,
@@ -167,13 +172,16 @@ export const AuthProvider = ({ children }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/warranty/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -185,7 +193,7 @@ export const AuthProvider = ({ children }) => {
 
       // showSuccessToast("Upload successful");
       setFormData({
-        warrantyId: "",
+        // warrantyId: "",
         status: "",
         vendor: "",
         productName: "",
@@ -196,20 +204,15 @@ export const AuthProvider = ({ children }) => {
         created_by: "",
         updated_by: "",
       });
-      setShow(false);
-    } catch (error) {
-      const errorMessage = "Error uploading file: " + error.message;
-      showErrorToast(errorMessage);
-      setMessage(errorMessage);
-      console.error(errorMessage);
-      setShow(true);
-    }
+      // showSuccessToast("add success")
+      setShowAddModal(false);
+    } catch (error) {}
   };
 
   const handleUpdateWarranty = async (formData) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/warranty/${formData.id}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/${formData.id}`,
         {
           method: "PUT",
           headers: {
@@ -232,7 +235,7 @@ export const AuthProvider = ({ children }) => {
   const handleDeleteWarranty = async (warrantyId) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/warrenty/${warrantyId}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/warrenty/${warrantyId}`,
         {
           method: "DELETE",
         }
