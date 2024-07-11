@@ -7,8 +7,7 @@ import {
 } from "../../../_metronic/_partials/controls";
 import { Button, Modal, Form } from "react-bootstrap";
 import FeedCard from "./FeedCard";
-import { AuthProvider, useAuth } from "./AuthContext";
-
+import { useAuth } from "./AuthContext";
 export default function ProductFeed({
   status = 0,
   title = "Product feed",
@@ -22,9 +21,7 @@ export default function ProductFeed({
     description: "",
     file: null,
   });
-
   const { userDetails, loading, handleUpload } = useAuth();
-
   useEffect(() => {
     if (!loading && userDetails && !formData.author) {
       const fullName = `${userDetails.result.firstName} ${userDetails.result.lastName}`;
@@ -34,45 +31,36 @@ export default function ProductFeed({
       }));
     }
   }, [userDetails, loading, formData.author]);
-
   const handleClose = () => {
-    setShow(false);
     setFormData({
       author: formData.author,
       description: "",
       file: null,
     });
+    setShow(false);
   };
-
   const handleFileChange = (e) => {
     setFormData({
       ...formData,
       file: e.target.files[0],
     });
   };
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
-
   const showModal = () => {
     setShow(true);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await handleUpload(formData, setMessage, setFormData);
-      // If upload is successful, close the modal
       handleClose();
-    } catch (error) {
-      // If upload fails, do nothing (show stays true)
-    }
+    } catch (error) {}
   };
-
   return (
     <>
       <Card style={{ marginTop: "0px" }}>
@@ -94,13 +82,10 @@ export default function ProductFeed({
           </CardHeader>
         )}
         <CardBody style={{ justifyContent: "center" }}>
-          <AuthProvider>
-            <FeedCard />
-          </AuthProvider>
+          <FeedCard />
         </CardBody>
       </Card>
-
-      {/* -----  Edit Modal ---- */}
+      {/* -----  Upload  Modal ---- */}
       <Modal
         show={show}
         onHide={handleClose}

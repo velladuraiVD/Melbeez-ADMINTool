@@ -6,18 +6,14 @@ import {
   showErrorToast,
   showWarnToast,
 } from "../../../Utility/toastMsg";
-
 const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider = ({ children }) => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -33,10 +29,8 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     fetchUserDetails();
   }, []);
-
   const fetchFeeds = async () => {
     try {
       const response = await fetch(
@@ -48,24 +42,22 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       setPostData(data);
     } catch (error) {
-      showErrorToast("Error fetching data: " + error.message);
+      showErrorToast("No feed found");
+      // console.log(error)
     }
   };
-
   const handleUpload = async (formData, setMessage, setFormData, setShow) => {
     if (!formData.author) {
       setMessage("Author is required.");
       showWarnToast("Please fill in all required fields.");
       return;
     }
-
     if (!formData.file && !formData.description) {
       setMessage("Please provide either an image or a description.");
-      showWarnToast("Please provide either an image or a description.");
+      showWarnToast("Please provide image and description.");
       setShow(true);
       return;
     }
-
     const form = new FormData();
     form.append("author", formData.author);
     if (formData.file) {
@@ -77,7 +69,6 @@ export const AuthProvider = ({ children }) => {
     if (userDetails) {
       form.append("userId", userDetails.result.id);
     }
-
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/upload`,
@@ -86,30 +77,34 @@ export const AuthProvider = ({ children }) => {
           body: form,
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
+        setShow(true);
         setMessage(errorMessage);
         showErrorToast(errorMessage);
         return;
       }
-
-      showSuccessToast("Upload successful");
+      // setShow(false)
+      showSuccessToast("Upload feed successful");
       setFormData({
         author: "",
         description: "",
         file: null,
       });
-      // Don't close the modal if only a description is provided
-      if (formData.description && !formData.file) {
-        setShow(false);
-      }
+      // // Don't close the modal if only a description is provided
+      // if (formData.description && !formData.file) {
+      //   setShow(true);
+      //   showWarnToast("Please provide image and description.");
+      // }else{
+      // }
+      // Fetch feeds after successful upload
+      fetchFeeds();
     } catch (error) {
-      const errorMessage = "Error uploading file: " + error.message;
-      showErrorToast(errorMessage);
+      const errorMessage = "Error uploading file";
+      showWarnToast("Please provide image and description.");
       setMessage(errorMessage);
-      console.error(errorMessage);
+      // console.error(errorMessage);
       setShow(true);
     }
   };
@@ -121,11 +116,9 @@ export const AuthProvider = ({ children }) => {
           method: "DELETE",
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to delete post");
       }
-
       setPostData((prevPosts) =>
         prevPosts.filter((post) => post.id !== postId)
       );
@@ -134,7 +127,6 @@ export const AuthProvider = ({ children }) => {
       showErrorToast("Error deleting post: " + error.message);
     }
   };
-
   const handleUploadwarrenty = async (
     formData,
     setMessage,
@@ -156,7 +148,6 @@ export const AuthProvider = ({ children }) => {
       showWarnToast("Please fill in all required fields.");
       return;
     }
-
     // Create JSON payload
     const payload = {
       // warrantyId: formData.warrantyId,
@@ -170,7 +161,6 @@ export const AuthProvider = ({ children }) => {
       created_by: formData.created_by,
       updated_by: formData.updated_by,
     };
-
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
@@ -182,7 +172,6 @@ export const AuthProvider = ({ children }) => {
           body: JSON.stringify(payload),
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -190,7 +179,6 @@ export const AuthProvider = ({ children }) => {
         showErrorToast(errorMessage);
         return;
       }
-
       // showSuccessToast("Upload successful");
       setFormData({
         // warrantyId: "",
@@ -208,7 +196,6 @@ export const AuthProvider = ({ children }) => {
       setShowAddModal(false);
     } catch (error) {}
   };
-
   const handleUpdateWarranty = async (formData) => {
     try {
       const response = await fetch(
@@ -221,17 +208,14 @@ export const AuthProvider = ({ children }) => {
           body: JSON.stringify(formData),
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to update warranty.");
       }
-
       return response.json(); // Optionally return data or handle success
     } catch (error) {
       throw new Error(error.message); // Throw error to be caught by the calling component
     }
   };
-
   const handleDeleteWarranty = async (warrantyId) => {
     try {
       const response = await fetch(
@@ -240,11 +224,9 @@ export const AuthProvider = ({ children }) => {
           method: "DELETE",
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to delete warranty");
       }
-
       setPostData((prevPosts) =>
         prevPosts.filter((post) => post.id !== warrantyId)
       );
@@ -253,7 +235,6 @@ export const AuthProvider = ({ children }) => {
       showErrorToast("Error deleting warranty: " + error.message);
     }
   };
-
   return (
     <AuthContext.Provider
       value={{
