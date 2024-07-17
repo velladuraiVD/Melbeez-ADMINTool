@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Table, Popover, Form, Alert } from "react-bootstrap";
+import { Table, Popover, Form, Alert } from "react-bootstrap"; // Import Alert from react-bootstrap
 import { TablePagination } from "@material-ui/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import ActionButtons from "./ActionButttons";
 
-const WarrantyTable = ({
+const WarrantypendingapprovalTable = ({
   columns,
   data,
   currentPage,
@@ -74,7 +74,9 @@ const WarrantyTable = ({
   return (
     <>
       {filteredData.length === 0 ? (
-        <div className="text-center text-danger mt-4">No data found.</div>
+      <div className="text-center text-danger mt-4">
+      No  pending data  found !
+    </div>
       ) : (
         <div className="table-responsive">
           <Table
@@ -121,4 +123,4 @@ const WarrantyTable = ({
   );
 };
 
-export default WarrantyTable;
+export default WarrantypendingapprovalTable;

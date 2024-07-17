@@ -135,43 +135,50 @@ export const AuthProvider = ({ children }) => {
   ) => {
     // Check required fields
     if (
-      // !formData.warrantyId||
       !formData.vendor ||
-      !formData.productName ||
+      !formData.name ||
       !formData.monthlyPrice ||
       !formData.annualPrice ||
-      !formData.discount ||
-      !formData.terms_conditions ||
-      !formData.status
+      !formData.planDescription ||
+      !formData.planName
     ) {
       setMessage("Please fill in all required fields.");
       showWarnToast("Please fill in all required fields.");
       return;
     }
-    // Create JSON payload
-    const payload = {
-      // warrantyId: formData.warrantyId,
-      status: formData.status,
-      vendor: formData.vendor,
-      productName: formData.productName,
-      monthlyPrice: formData.monthlyPrice,
-      annualPrice: formData.annualPrice,
-      discount: formData.discount,
-      terms_conditions: formData.terms_conditions,
-      created_by: formData.created_by,
-      updated_by: formData.updated_by,
-    };
+  
+    // Ensure userDetails is available and contains necessary information
+    if (!userDetails || !userDetails.result || !userDetails.result.id) {
+      showErrorToast("User details not found.");
+      return;
+    }
+  
+    // Create FormData payload
+    const form = new FormData();
+    form.append("vendor", formData.vendor);
+    form.append("name", formData.name);
+    form.append("monthlyPrice", formData.monthlyPrice);
+    form.append("annualPrice", formData.annualPrice);
+    form.append("discount", formData.discount || "0"); // Optional field
+    form.append("created_by", userDetails.result.firstName +" " +userDetails.result.lastName); // Use userId from userDetails
+    form.append("updated_by", ""); // Use userId from userDetails
+    form.append("planDescription", formData.planDescription);
+    form.append("planName", formData.planName);
+  
+    // Append file if it exists
+    if (formData.file) {
+      form.append("file", formData.file);
+    }
+  
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          body: form,
         }
       );
+  
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -179,23 +186,29 @@ export const AuthProvider = ({ children }) => {
         showErrorToast(errorMessage);
         return;
       }
-      // showSuccessToast("Upload successful");
+  
       setFormData({
-        // warrantyId: "",
-        status: "",
         vendor: "",
-        productName: "",
+        name: "",
         monthlyPrice: "",
         annualPrice: "",
         discount: "",
-        terms_conditions: "",
         created_by: "",
         updated_by: "",
+        planDescription: "",
+        planName: "",
+        file: null,
       });
-      // showSuccessToast("add success")
       setShowAddModal(false);
-    } catch (error) {}
+      showSuccessToast("Upload successful");
+    } catch (error) {
+      // setMessage("Error uploading warranty");
+      // showErrorToast("Error uploading warranty: " + error.message);
+      // setShow(true);
+    }
   };
+  
+  
   const handleUpdateWarranty = async (formData) => {
     try {
       const response = await fetch(
