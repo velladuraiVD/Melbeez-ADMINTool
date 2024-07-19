@@ -125,7 +125,7 @@ const AddUpload = ({
             <Form.Control
               type="text"
               autoComplete="off"
-              placeholder="Product Name"
+              placeholder="Name"
               name="name"
               className="mb-3"
               required
