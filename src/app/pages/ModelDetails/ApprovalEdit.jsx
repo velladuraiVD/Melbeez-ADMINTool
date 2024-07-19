@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 
-const AddEditModal = ({
+const AddEditModalApproval = ({
   show,
   onHide,
   formData,
@@ -10,6 +10,7 @@ const AddEditModal = ({
   handleSubmit,
   setFormData,
 }) => {
+
   const [validated, setValidated] = useState(false);
   const [fileError, setFileError] = useState("");
   const handleSubmitForm = async (e) => {
@@ -34,11 +35,9 @@ const AddEditModal = ({
 
   const handlePlanDescriptionChange = (e) => {
     const value = e.target.value;
-    const lines = value.split("\n");
-    const isValid = lines.every((line) => line.includes(","));
-    e.target.setCustomValidity(
-      isValid ? "" : "Each line must be separated by a comma."
-    );
+    const lines = value.split('\n');
+    const isValid = lines.every(line => line.includes(','));
+    e.target.setCustomValidity(isValid ? "" : "Each line must be separated by a comma.");
     handleInputChange(e);
   };
 
@@ -78,7 +77,7 @@ const AddEditModal = ({
             }}
           >
             <Form.Label>* Vendor Name</Form.Label>
-            <Form.Control
+            <Form.Control readOnly
               type="text"
               autoComplete="off"
               placeholder="Vendor Name"
@@ -101,6 +100,7 @@ const AddEditModal = ({
           >
             <Form.Label>* Product Name</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="name"
@@ -123,6 +123,7 @@ const AddEditModal = ({
           >
             <Form.Label>* Monthly Price</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Monthly Price"
@@ -146,6 +147,7 @@ const AddEditModal = ({
           >
             <Form.Label>* Annual Price</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Annual Price"
@@ -169,6 +171,7 @@ const AddEditModal = ({
           >
             <Form.Label>* Discount</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Discount"
@@ -190,34 +193,29 @@ const AddEditModal = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Status</Form.Label>
-            <Form.Control
-              as="select"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              required
-            >
-              {formData.status === "Pending" && (
-                <>
-                  <option value="Pending">Pending</option>
-                </>
-              )}
-              {formData.status !== "Pending" && (
-                <>
-                  {/* <option value="">Select</option> */}
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </>
-              )}
-            </Form.Control>
-            <Form.Control.Feedback type="invalid">
-              Please select a status.
-            </Form.Control.Feedback>
+             <Form.Group controlId="status">
+              <Form.Label> * Status</Form.Label>
+              <Form.Control
+                as="select"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">pending</option>
+                {/* <option value="Pending">Pending</option> */}
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">
+                Please select a status.
+              </Form.Control.Feedback>
+            </Form.Group>
           </div>
           <Form.Group>
             <Form.Label>* Plan Description</Form.Label>
             <Form.Control
+            readOnly
               as="textarea"
               rows={3}
               name="planDescription"
@@ -239,6 +237,7 @@ const AddEditModal = ({
           >
             <Form.Label>Plan Name</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Plan Name"
@@ -272,4 +271,4 @@ const AddEditModal = ({
   );
 };
 
-export default AddEditModal;
+export default AddEditModalApproval;

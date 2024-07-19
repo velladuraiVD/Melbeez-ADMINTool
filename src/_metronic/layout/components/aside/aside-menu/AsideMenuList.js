@@ -165,7 +165,7 @@ export function AsideMenuList({ layoutProps }) {
                 src={toAbsoluteUrl("/media/svg/icons/General/warrenty3.svg")}
               />
             </span>
-            <span className="menu-text">Warrenty Product info</span>
+            <span className="menu-text">Warranty Product info</span>
             <i className="menu-arrow" />
           </NavLink>
           {isSuperAdmin && (
@@ -174,14 +174,37 @@ export function AsideMenuList({ layoutProps }) {
                 <i className="menu-arrow" />
                 <ul className="menu-subnav">
                   <li
-                    className={`menu-item ${getMenuItemActive("/warrenty")}`}
+                    className={`menu-item ${getMenuItemActive("/warranty")}`}
                     aria-haspopup="true"
                   >
-                    <NavLink className="menu-link" to="/warrenty">
+                    <NavLink className="menu-link" to="/warranty">
                       <i className="menu-bullet menu-bullet-dot">
                         <span />
                       </i>
                       <span className="menu-text">All Warranties</span>
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+            </>
+          )}
+
+          {isSuperAdmin && (
+            <>
+              <div className="menu-submenu">
+                <i className="menu-arrow" />
+                <ul className="menu-subnav">
+                  <li
+                    className={`menu-item ${getMenuItemActive(
+                      "/warrantyapproval"
+                    )}`}
+                    aria-haspopup="true"
+                  >
+                    <NavLink className="menu-link" to="/warrantyapproval">
+                      <i className="menu-bullet menu-bullet-dot">
+                        <span />
+                      </i>
+                      <span className="menu-text">warranty approval</span>
                     </NavLink>
                   </li>
                 </ul>

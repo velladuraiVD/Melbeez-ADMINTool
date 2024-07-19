@@ -9,13 +9,16 @@ const AddUpload = ({
   setFormData,
   formData,
   handleInputChange,
+
 }) => {
   const [validated, setValidated] = useState(false);
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
-    // Reset validation state when modal shows
+    // Reset validation state and file error when modal shows
     if (show) {
       setValidated(false);
+      setFileError("");
     }
   }, [show]);
 
@@ -41,6 +44,40 @@ const AddUpload = ({
     setValidated(true);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const fileTypes = ["image/jpeg", "image/png", "image/gif"];
+    
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) {
+        setFileError("File size should not exceed 4 MB.");
+        setFormData({
+          ...formData,
+          file: null,
+        });
+      } else if (!fileTypes.includes(file.type)) {
+        setFileError("Only image files are allowed.");
+        setFormData({
+          ...formData,
+          file: null,
+        });
+      } else {
+        setFileError("");
+        setFormData({
+          ...formData,
+          file,
+        });
+      }
+    }
+  };
+
+  const handlePlanDescriptionChange = (e) => {
+    const value = e.target.value;
+    const lines = value.split('\n');
+    const isValid = lines.every(line => line.includes(','));
+    e.target.setCustomValidity(isValid ? "" : "Each line must be separated by a comma.");
+    handleInputChange(e);
+  };
 
   return (
     <Modal
@@ -51,32 +88,10 @@ const AddUpload = ({
       size="lg"
     >
       <Modal.Header closeButton>
-        <Modal.Title> Add Warranty Product</Modal.Title>
+        <Modal.Title>Add Warranty Product</Modal.Title>
       </Modal.Header>
       <Form noValidate validated={validated} onSubmit={handleSubmitForm}>
         <Modal.Body>
-          {/* <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group controlId="warrantyId">
-              <Form.Label>* Warranty ID</Form.Label>
-              <Form.Control
-                type="text"
-                name="warrantyId"
-                value={formData.warrantyId}
-                onChange={handleInputChange}
-                required
-                pattern="^\d*(\.\d{0,2})?$"
-              />
-              <Form.Control.Feedback type="invalid">
-                Please provide a warranty ID.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </div> */}
           <div
             style={{
               display: "inline-block",
@@ -106,15 +121,15 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Product Name</Form.Label>
+            <Form.Label>* Name</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
               placeholder="Product Name"
-              name="productName"
+              name="name"
               className="mb-3"
               required
-              value={formData.productName}
+              value={formData.name}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -128,7 +143,7 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label> * Monthly Price</Form.Label>
+            <Form.Label>* Monthly Price</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
@@ -151,7 +166,7 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label> * Annual Price</Form.Label>
+            <Form.Label>* Annual Price</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
@@ -174,7 +189,7 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label> * Discount</Form.Label>
+            <Form.Label>Discount</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
@@ -182,12 +197,50 @@ const AddUpload = ({
               name="discount"
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
-              required
+           
               value={formData.discount}
               onChange={handleInputChange}
             />
-            <Form.Control.Feedback type="invalid">
+            {/* <Form.Control.Feedback type="invalid">
               Please provide a discount.
+            </Form.Control.Feedback> */}
+          </div>
+          <Form.Group>
+            <Form.Label>* Plan Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="planDescription"
+              placeholder="input must be separate by comma {Ex:Protect any phone, Accidental damage,}"
+              className="mb-3"
+              required
+              value={formData.planDescription}
+              onChange={handlePlanDescriptionChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Each line must be separated by a comma.
+            </Form.Control.Feedback>
+          </Form.Group>
+          <div
+            style={{
+              display: "inline-block",
+              width: "48%",
+              marginRight: "8px",
+            }}
+          >
+            <Form.Label>* Plan Name</Form.Label>
+            <Form.Control
+              type="text"
+              autoComplete="off"
+              placeholder="Plan Name"
+              name="planName"
+              className="mb-3"
+              required
+              value={formData.planName}
+              onChange={handleInputChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please provide additional details.
             </Form.Control.Feedback>
           </div>
           <div
@@ -197,81 +250,19 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Group controlId="status">
-              <Form.Label> * Status</Form.Label>
-              <Form.Control
-                as="select"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select</option>
-                <option value="Pending">Pending</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </Form.Control>
-              <Form.Control.Feedback type="invalid">
-                Please select a status.
-              </Form.Control.Feedback>
-            </Form.Group>
-          </div>
-          <div>
-            <Form.Label>* Terms and Conditions</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="terms_conditions"
-              className="mb-3"
-              value={formData.terms_conditions}
-              onChange={handleInputChange}
-            />
-          </div>
-          {formData.id ? (
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>* Updated By</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Updated By"
-                name="updated_by"
-                className="mb-3"
-                value={formData.updated_by}
-                onChange={handleInputChange}
-              />
+            <div className="border border-gray-100 border-2 p-2 w-60">
+              <input type="file" id="file" onChange={handleFileChange} />
+              {fileError && (
+                <div className="text-danger mt-2">{fileError}</div>
+              )}
             </div>
-          ) : (
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>* Created By</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Created By"
-                name="created_by"
-                className="mb-3"
-                value={formData.created_by}
-                onChange={handleInputChange}
-              />
-            </div>
-          )}
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={onHide}>
             Close
           </Button>
-          <Button variant="primary" type="submit" >
+          <Button variant="primary" type="submit">
             Save
           </Button>
         </Modal.Footer>
