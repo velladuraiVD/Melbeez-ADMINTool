@@ -99,12 +99,12 @@ const AddEditModal = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Product Name</Form.Label>
+            <Form.Label>* Name</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
               placeholder="name"
-              name="productName"
+              name="name"
               className="mb-3"
               required
               value={formData.name}

@@ -37,7 +37,7 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
             }}
           >
             <Form.Group>
-              <Form.Label>Product Name</Form.Label>
+              <Form.Label>Name</Form.Label>
               <Form.Control type="text" value={formData.name} readOnly />
             </Form.Group>
           </div>
@@ -89,7 +89,7 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
             }}
           >
             <Form.Group>
-              <Form.Label>status</Form.Label>
+              <Form.Label>Status</Form.Label>
               <Form.Control type="text" readOnly value={formData.status} />
             </Form.Group>
           </div>
@@ -102,7 +102,27 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
               value={formData.planDescription}
             />
           </Form.Group>
-
+          <div
+            style={{
+              display: "inline-block",
+              width: "48%",
+              marginRight: "8px",
+            }}
+          >
+            <Form.Label>Plan Name</Form.Label>
+            <Form.Control
+            readOnly
+              type="text"
+              autoComplete="off"
+              placeholder="Plan Name"
+              name="planName"
+              className="mb-3"
+              required
+              value={formData.planName}
+             
+            />
+           
+          </div>
           <div
             style={{
               display: "inline-block",
