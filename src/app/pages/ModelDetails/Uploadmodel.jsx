@@ -9,7 +9,6 @@ const AddUpload = ({
   setFormData,
   formData,
   handleInputChange,
-
 }) => {
   const [validated, setValidated] = useState(false);
   const [fileError, setFileError] = useState("");
@@ -26,18 +25,18 @@ const AddUpload = ({
     e.preventDefault();
     const form = e.currentTarget;
 
-    if (form.checkValidity() === false) {
+    if (form.checkValidity() === false || !formData.file) {
       e.stopPropagation();
+      if (!formData.file) setFileError("File is required.");
     } else {
       try {
-        await handleSubmit(e); // Call handleSubmit function passed from parent
-
-        onHide(); // Close modal
+        await handleSubmit(e);
+        onHide();
         setFormData(""); // Clear form data
-        // showSuccessToast("Warranty product added successfully.");
+        // showSuccessToast("Upload successful.");
       } catch (error) {
-        console.error("Error handling warranty:", error);
-        showErrorToast("Error handling warranty.");
+        console.error("Error handling upload:", error);
+        showErrorToast("Error handling upload.");
       }
     }
 
@@ -47,7 +46,7 @@ const AddUpload = ({
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     const fileTypes = ["image/jpeg", "image/png", "image/gif"];
-    
+
     if (file) {
       if (file.size > 4 * 1024 * 1024) {
         setFileError("File size should not exceed 4 MB.");
@@ -68,14 +67,22 @@ const AddUpload = ({
           file,
         });
       }
+    } else {
+      setFileError("File is required.");
+      setFormData({
+        ...formData,
+        file: null,
+      });
     }
   };
 
   const handlePlanDescriptionChange = (e) => {
     const value = e.target.value;
-    const lines = value.split('\n');
-    const isValid = lines.every(line => line.includes(','));
-    e.target.setCustomValidity(isValid ? "" : "Each line must be separated by a comma.");
+    const lines = value.split("\n");
+    const isValid = lines.every((line) => line.includes(","));
+    e.target.setCustomValidity(
+      isValid ? "" : "Each line must be separated by a comma."
+    );
     handleInputChange(e);
   };
 
@@ -197,7 +204,6 @@ const AddUpload = ({
               name="discount"
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
-           
               value={formData.discount}
               onChange={handleInputChange}
             />
@@ -251,10 +257,13 @@ const AddUpload = ({
             }}
           >
             <div className="border border-gray-100 border-2 p-2 w-60">
-              <input type="file" id="file" onChange={handleFileChange} />
-              {fileError && (
-                <div className="text-danger mt-2">{fileError}</div>
-              )}
+              <input
+                type="file"
+                id="file"
+                onChange={handleFileChange}
+                required
+              />
+              {fileError && <div className="text-danger mt-2">{fileError}</div>}
             </div>
           </div>
         </Modal.Body>

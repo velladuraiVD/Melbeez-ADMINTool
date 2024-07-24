@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
-const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
+const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
   return (
     <Modal
       show={show}
@@ -111,7 +111,7 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
           >
             <Form.Label>Plan Name</Form.Label>
             <Form.Control
-            readOnly
+              readOnly
               type="text"
               autoComplete="off"
               placeholder="Plan Name"
@@ -119,9 +119,7 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
               className="mb-3"
               required
               value={formData.planName}
-             
             />
-           
           </div>
           <div
             style={{
@@ -136,14 +134,20 @@ const ViewUpload = ({ show, onHide, formData, handleBlur }) => {
                 <img
                   src={formData.pictureLink}
                   alt="Uploaded"
-                  style={{ maxWidth: "100%", maxHeight: "400px", }}
+                  style={{ maxWidth: "100%", maxHeight: "400px" }}
                 />
               </div>
             </Form.Group>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              onHide();
+              setFormData({});
+            }}
+          >
             Close
           </Button>
         </Modal.Footer>
