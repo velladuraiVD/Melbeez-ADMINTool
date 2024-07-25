@@ -252,6 +252,7 @@ const AddEditModal = ({
               Please provide additional details.
             </Form.Control.Feedback>
           </div>
+          
         </Modal.Body>
         <Modal.Footer>
           <Button

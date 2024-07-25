@@ -9,7 +9,7 @@ export default function Warrentypendingapproval() {
       <AuthProvider>
         <WarrantyApprovalProductQueueTable
           status={""}
-          title={"All Pending Warrantty"}
+          title={"All Pending Warranty"}
           screen="ALL_DATA"
         />
       </AuthProvider>

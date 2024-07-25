@@ -272,7 +272,7 @@ const WarrantyProductQueueTable = ({
       }
 
       // Filter out the 'id' field from each object in data
-      const filteredData = data.map(({ id, picture,...rest }) => rest);
+      const filteredData = data.map(({ id, picture, ...rest }) => rest);
 
       const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
@@ -424,6 +424,7 @@ const WarrantyProductQueueTable = ({
           />
 
           <ViewUpload
+            setFormData={setFormData}
             show={showViewModal}
             onHide={handleCloseModal}
             formData={formData}
