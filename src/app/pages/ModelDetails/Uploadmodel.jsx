@@ -268,7 +268,10 @@ const AddUpload = ({
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary"   onClick={() => {
+              onHide();
+              setFormData({});
+            }}>
             Close
           </Button>
           <Button variant="primary" type="submit">
