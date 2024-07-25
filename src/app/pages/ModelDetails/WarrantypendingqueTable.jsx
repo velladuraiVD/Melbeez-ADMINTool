@@ -324,7 +324,7 @@ const WarrantypendingqueTable = ({
       <Card>
         <CardHeader title={title}>
           <CardHeaderToolbar>
-            <div>
+            {/* <div>
               <select
                 name="statusSelect"
                 id="statusSelect"
@@ -347,13 +347,13 @@ const WarrantypendingqueTable = ({
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
-            </div>
+            </div> */}
             <div className="d-flex">
               <div>
                 <input
                   type="search"
                   className="form-control"
-                  placeholder="Search all warranty..."
+                  placeholder="Search..."
                   onChange={handleCommonSearchChange}
                   value={commonSearchTerm}
                 />
@@ -369,11 +369,11 @@ const WarrantypendingqueTable = ({
               </div>
             </div>
             <div className="d-flex">
-              <div>
+              {/* <div>
                 <Button onClick={() => setShowAddModal(true)}>
                   Add Warranty
                 </Button>
-              </div>
+              </div> */}
               <div>
                 <button
                   onClick={exportToExcel}
@@ -400,14 +400,14 @@ const WarrantypendingqueTable = ({
             handleSearchChange={handleSearchChange}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
-          <AddUpload
+          {/* <AddUpload
             setFormData={setFormData}
             show={showAddModel}
             onHide={() => setShowAddModal(false)}
             formData={formData}
             handleSubmit={handleSubmit}
             handleInputChange={handleInputChange}
-          />
+          /> */}
           <AddEditModalApproval
             setFormData={setFormData}
             show={showAddEditModal}
