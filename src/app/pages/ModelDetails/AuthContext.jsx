@@ -1,10 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { authUserDetail } from "../../services/ProfileService";
-import {
-  showSuccessToast,
-  showErrorToast,
-  showWarnToast,
-} from "../../../Utility/toastMsg";
+// AuthProvider.js
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authUserDetail } from '../../services/ProfileService';
+import { showSuccessToast, showErrorToast, showWarnToast } from '../../../Utility/toastMsg'; 
 
 const AuthContext = createContext();
 
@@ -15,9 +12,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
-  const [likedPosts, setLikedPosts] = useState([]);
-  const [shareLink, setShareLink] = useState(null); // State to hold shareable link
-  const [postId, setPostId] = useState(null); // State to hold selected post ID
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -65,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchFeeds = async () => {
     try {
-      const response = await fetch("http://192.168.1.13:5000/api/feedposts/");
+      const response = await fetch("http://192.168.1.9:8083/feeds");
       if (!response.ok) {
         throw new Error("Failed to fetch feeds");
       }
@@ -103,11 +97,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch("http://192.168.1.9:8083/upload", {
-        method: "POST",
+      const response = await fetch('http://192.168.1.9:8083/upload', {
+        method: 'POST',
         body: form,
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -137,12 +131,9 @@ export const AuthProvider = ({ children }) => {
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(
-        `http://192.168.1.9:8083/feeds/id/${postId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`http://192.168.1.9:8083/feeds/id/${postId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete post");
@@ -156,6 +147,11 @@ export const AuthProvider = ({ children }) => {
       showErrorToast("Error deleting post: " + error.message);
     }
   };
+
+ 
+
+
+
 
   const handleLikePost = async (postId) => {
     try {
@@ -347,23 +343,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
   return (
-    <AuthContext.Provider
-      value={{
-        userDetails,
-        loading,
-        error,
-        handleUpload,
-        postData,
-        fetchFeeds,
-        handleDeletePost,
-        handleLikePost,
-        fetchShareLink,
-        shareLink,
-        handleUploadwarrenty,
-        handleUpdateWarranty,
-        handleDeleteWarranty,
-      }}
-    >
+    <AuthContext.Provider value={{ userDetails, loading, error, handleUpload, postData, fetchFeeds, handleDeletePost }}>
       {children}
     </AuthContext.Provider>
   );
