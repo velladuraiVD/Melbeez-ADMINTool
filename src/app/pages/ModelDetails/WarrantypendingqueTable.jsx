@@ -19,14 +19,16 @@ import * as XLSX from "xlsx";
 import AddUpload from "./Uploadmodel";
 import ViewUpload from "./Viewwarranty";
 
-const WarrantyProductQueueTable = ({
+import AddEditModalApproval from "./ApprovalEdit";
+import WarrantypendingapprovalTable from "./WarrantypendingapprovalTable";
+
+const WarrantypendingqueTable = ({
   status = 0,
   title = "Warranty Queue",
   screen = "",
   isApproved = false,
 }) => {
   const [warrantyData, setWarrantyData] = useState([]);
-  const [fileError, setFileError] = useState("");
   const [columns] = useState([
     { dataField: "warrantyId", text: "Warranty ID", headerSortingClasses },
     { dataField: "vendor", text: "Vendor", headerSortingClasses },
@@ -69,7 +71,7 @@ const WarrantyProductQueueTable = ({
       headerSortingClasses,
     },
     // {
-    //   dataField: "picture",
+    //   dataField: "updated_by",
     //   text: "Warrantyimage",
     //   formatter: (cell) => cell || "N/A",
     //   headerSortingClasses,
@@ -109,7 +111,7 @@ const WarrantyProductQueueTable = ({
     planName: "",
     pictureLink: "", // Clear planName field
     // terms_conditions: "",
-    created_by: "",
+    // created_by: "",
     updated_by: "",
     file: null, // Clear the image file field
   });
@@ -141,7 +143,7 @@ const WarrantyProductQueueTable = ({
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/warranty/all`
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/pending`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -175,8 +177,8 @@ const WarrantyProductQueueTable = ({
       planName: row.planName,
       pictureLink: row.pictureLink,
       // terms_conditions: row.terms_conditions,
-      // created_by: row.created_by,
-      // updated_by: row.updated_by,
+      created_by: row.created_by,
+      updated_by: row.updated_by,
     });
     setShowViewModal(true);
   };
@@ -197,8 +199,7 @@ const WarrantyProductQueueTable = ({
       discount: row.discount,
       planDescription: row.planDescription,
       planName: row.planName,
-      // terms_conditions: row.terms_conditions,
-      // created_by: row.created_by,
+      pictureLink: row.pictureLink,
       updated_by:
         userDetails.result.firstName + "" + userDetails.result.lastName,
     });
@@ -272,7 +273,7 @@ const WarrantyProductQueueTable = ({
       }
 
       // Filter out the 'id' field from each object in data
-      const filteredData = data.map(({ id, picture, ...rest }) => rest);
+      const filteredData = data.map(({ id, picture,...rest }) => rest);
 
       const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
@@ -323,7 +324,7 @@ const WarrantyProductQueueTable = ({
       <Card>
         <CardHeader title={title}>
           <CardHeaderToolbar>
-            <div>
+            {/* <div>
               <select
                 name="statusSelect"
                 id="statusSelect"
@@ -346,13 +347,13 @@ const WarrantyProductQueueTable = ({
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
-            </div>
+            </div> */}
             <div className="d-flex">
               <div>
                 <input
                   type="search"
                   className="form-control"
-                  placeholder="Search all warranty..."
+                  placeholder="Search..."
                   onChange={handleCommonSearchChange}
                   value={commonSearchTerm}
                 />
@@ -368,11 +369,11 @@ const WarrantyProductQueueTable = ({
               </div>
             </div>
             <div className="d-flex">
-              <div>
+              {/* <div>
                 <Button onClick={() => setShowAddModal(true)}>
                   Add Warranty
                 </Button>
-              </div>
+              </div> */}
               <div>
                 <button
                   onClick={exportToExcel}
@@ -387,7 +388,7 @@ const WarrantyProductQueueTable = ({
           </CardHeaderToolbar>
         </CardHeader>
         <CardBody style={{ justifyContent: "center" }}>
-          <WarrantyTable
+          <WarrantypendingapprovalTable
             columns={columns}
             data={filteredData}
             currentPage={currentPage}
@@ -399,16 +400,15 @@ const WarrantyProductQueueTable = ({
             handleSearchChange={handleSearchChange}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
-          <AddUpload
-            // handleFileChange={handleFileChange}
+          {/* <AddUpload
             setFormData={setFormData}
             show={showAddModel}
             onHide={() => setShowAddModal(false)}
             formData={formData}
             handleSubmit={handleSubmit}
             handleInputChange={handleInputChange}
-          />
-          <AddEditModal
+          /> */}
+          <AddEditModalApproval
             setFormData={setFormData}
             show={showAddEditModal}
             onHide={() => setShowAddEditModal(false)}
@@ -424,7 +424,6 @@ const WarrantyProductQueueTable = ({
           />
 
           <ViewUpload
-            setFormData={setFormData}
             show={showViewModal}
             onHide={handleCloseModal}
             formData={formData}
@@ -435,4 +434,4 @@ const WarrantyProductQueueTable = ({
   );
 };
 
-export default WarrantyProductQueueTable;
+export default WarrantypendingqueTable;

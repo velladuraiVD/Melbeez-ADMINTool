@@ -1,88 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 
-const AddUpload = ({
+const AddEditModalApproval = ({
   show,
   onHide,
-  handleSubmit,
-  setFormData,
   formData,
   handleInputChange,
+  handleSubmit,
+  setFormData,
 }) => {
+
   const [validated, setValidated] = useState(false);
   const [fileError, setFileError] = useState("");
-
-  useEffect(() => {
-    // Reset validation state and file error when modal shows
-    if (show) {
-      setValidated(false);
-      setFileError("");
-    }
-  }, [show]);
-
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
 
-    if (form.checkValidity() === false || !formData.file) {
+    if (form.checkValidity() === false) {
       e.stopPropagation();
-      if (!formData.file) setFileError("File is required.");
     } else {
       try {
-        await handleSubmit(e);
-        onHide();
-        setFormData(""); // Clear form data
-        // showSuccessToast("Upload successful.");
+        await handleSubmit(e); // Call handleSubmit function passed from parent
+
+        onHide(); // Close modal
       } catch (error) {
-        console.error("Error handling upload:", error);
-        showErrorToast("Error handling upload.");
+        // console.error("Error handling warranty:", error);
+        showErrorToast("Error handling warranty.");
       }
     }
 
     setValidated(true);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    const fileTypes = ["image/jpeg", "image/png", "image/gif"];
-
-    if (file) {
-      if (file.size > 4 * 1024 * 1024) {
-        setFileError("File size should not exceed 4 MB.");
-        setFormData({
-          ...formData,
-          file: null,
-        });
-      } else if (!fileTypes.includes(file.type)) {
-        setFileError("Only image files are allowed.");
-        setFormData({
-          ...formData,
-          file: null,
-        });
-      } else {
-        setFileError("");
-        setFormData({
-          ...formData,
-          file,
-        });
-      }
-    } else {
-      setFileError("File is required.");
-      setFormData({
-        ...formData,
-        file: null,
-      });
-    }
-  };
-
   const handlePlanDescriptionChange = (e) => {
     const value = e.target.value;
-    const lines = value.split("\n");
-    const isValid = lines.every((line) => line.includes(","));
-    e.target.setCustomValidity(
-      isValid ? "" : "Each line must be separated by a comma."
-    );
+    const lines = value.split('\n');
+    const isValid = lines.every(line => line.includes(','));
+    e.target.setCustomValidity(isValid ? "" : "Each line must be separated by a comma.");
     handleInputChange(e);
   };
 
@@ -95,10 +50,25 @@ const AddUpload = ({
       size="lg"
     >
       <Modal.Header closeButton>
-        <Modal.Title>Add Warranty Product</Modal.Title>
+        <Modal.Title>Edit Warranty Product</Modal.Title>
       </Modal.Header>
       <Form noValidate validated={validated} onSubmit={handleSubmitForm}>
         <Modal.Body>
+          {/* <div style={{ display: 'inline-block', width: '48%', marginRight: '8px' }}>
+            <Form.Group controlId="warrantyId">
+              <Form.Label>* Warranty ID</Form.Label>
+              <Form.Control
+                type="text"
+                name="warrantyId"
+                value={formData.warrantyId}
+                onChange={handleInputChange}
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                Please provide a warranty ID.
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div> */}
           <div
             style={{
               display: "inline-block",
@@ -107,7 +77,7 @@ const AddUpload = ({
             }}
           >
             <Form.Label>* Vendor Name</Form.Label>
-            <Form.Control
+            <Form.Control readOnly
               type="text"
               autoComplete="off"
               placeholder="Vendor Name"
@@ -128,12 +98,13 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Name</Form.Label>
+            <Form.Label>* Product Name</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
-              placeholder="Name"
-              name="name"
+              placeholder="name"
+              name="productName"
               className="mb-3"
               required
               value={formData.name}
@@ -152,6 +123,7 @@ const AddUpload = ({
           >
             <Form.Label>* Monthly Price</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Monthly Price"
@@ -163,7 +135,7 @@ const AddUpload = ({
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
-              Please provide a valid monthly price.
+              Please provide a monthly price.
             </Form.Control.Feedback>
           </div>
           <div
@@ -175,6 +147,7 @@ const AddUpload = ({
           >
             <Form.Label>* Annual Price</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Annual Price"
@@ -186,7 +159,7 @@ const AddUpload = ({
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
-              Please provide a valid annual price.
+              Please provide an annual price.
             </Form.Control.Feedback>
           </div>
           <div
@@ -196,28 +169,56 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>Discount</Form.Label>
+            <Form.Label>* Discount</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Discount"
               name="discount"
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
+              required
               value={formData.discount}
               onChange={handleInputChange}
             />
-            {/* <Form.Control.Feedback type="invalid">
+            <Form.Control.Feedback type="invalid">
               Please provide a discount.
-            </Form.Control.Feedback> */}
+            </Form.Control.Feedback>
+          </div>
+          <div
+            style={{
+              display: "inline-block",
+              width: "48%",
+              marginRight: "8px",
+            }}
+          >
+             <Form.Group controlId="status">
+              <Form.Label> * Status</Form.Label>
+              <Form.Control
+                as="select"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">pending</option>
+                {/* <option value="Pending">Pending</option> */}
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </Form.Control>
+              <Form.Control.Feedback type="invalid">
+                Please select a status.
+              </Form.Control.Feedback>
+            </Form.Group>
           </div>
           <Form.Group>
             <Form.Label>* Plan Description</Form.Label>
             <Form.Control
+            readOnly
               as="textarea"
               rows={3}
               name="planDescription"
-              placeholder="input must be separate by comma {Ex:Protect any phone, Accidental damage,}"
               className="mb-3"
               required
               value={formData.planDescription}
@@ -234,8 +235,9 @@ const AddUpload = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Plan Name</Form.Label>
+            <Form.Label>Plan Name</Form.Label>
             <Form.Control
+            readOnly
               type="text"
               autoComplete="off"
               placeholder="Plan Name"
@@ -249,33 +251,19 @@ const AddUpload = ({
               Please provide additional details.
             </Form.Control.Feedback>
           </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <div className="border border-gray-100 border-2 p-2 w-60">
-              <input
-                type="file"
-                id="file"
-                onChange={handleFileChange}
-                required
-              />
-              {fileError && <div className="text-danger mt-2">{fileError}</div>}
-            </div>
-          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary"   onClick={() => {
+          <Button
+            variant="secondary"
+            onClick={() => {
               onHide();
               setFormData({});
-            }}>
+            }}
+          >
             Close
           </Button>
           <Button variant="primary" type="submit">
-            Save
+            Save Changes
           </Button>
         </Modal.Footer>
       </Form>
@@ -283,4 +271,4 @@ const AddUpload = ({
   );
 };
 
-export default AddUpload;
+export default AddEditModalApproval;

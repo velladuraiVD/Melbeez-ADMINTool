@@ -11,7 +11,7 @@ const AddEditModal = ({
   setFormData,
 }) => {
   const [validated, setValidated] = useState(false);
-
+  const [fileError, setFileError] = useState("");
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -30,6 +30,16 @@ const AddEditModal = ({
     }
 
     setValidated(true);
+  };
+
+  const handlePlanDescriptionChange = (e) => {
+    const value = e.target.value;
+    const lines = value.split("\n");
+    const isValid = lines.every((line) => line.includes(","));
+    e.target.setCustomValidity(
+      isValid ? "" : "Each line must be separated by a comma."
+    );
+    handleInputChange(e);
   };
 
   return (
@@ -89,15 +99,15 @@ const AddEditModal = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Product Name</Form.Label>
+            <Form.Label>* Name</Form.Label>
             <Form.Control
               type="text"
               autoComplete="off"
-              placeholder="Product Name"
-              name="productName"
+              placeholder="name"
+              name="name"
               className="mb-3"
               required
-              value={formData.productName}
+              value={formData.name}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -180,87 +190,69 @@ const AddEditModal = ({
               marginRight: "8px",
             }}
           >
-             <Form.Group controlId="status">
-              <Form.Label> * Status</Form.Label>
-              <Form.Control
-                as="select"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select</option>
-                <option value="Pending">Pending</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </Form.Control>
-              <Form.Control.Feedback type="invalid">
-                Please select a status.
-              </Form.Control.Feedback>
-            </Form.Group>
+            <Form.Label>* Status</Form.Label>
+            <Form.Control
+              as="select"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              required
+            >
+              {formData.status === "Pending" && (
+                <>
+                  <option value="Pending">Pending</option>
+                </>
+              )}
+              {formData.status !== "Pending" && (
+                <>
+                  {/* <option value="">Select</option> */}
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </>
+              )}
+            </Form.Control>
+            <Form.Control.Feedback type="invalid">
+              Please select a status.
+            </Form.Control.Feedback>
           </div>
-          <div>
-            <Form.Label>* Terms and Conditions</Form.Label>
+          <Form.Group>
+            <Form.Label>* Plan Description</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
-              name="terms_conditions"
+              name="planDescription"
               className="mb-3"
               required
-              value={formData.terms_conditions}
+              value={formData.planDescription}
+              onChange={handlePlanDescriptionChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Each line must be separated by a comma.
+            </Form.Control.Feedback>
+          </Form.Group>
+          <div
+            style={{
+              display: "inline-block",
+              width: "48%",
+              marginRight: "8px",
+            }}
+          >
+            <Form.Label>Plan Name</Form.Label>
+            <Form.Control
+              type="text"
+              autoComplete="off"
+              placeholder="Plan Name"
+              name="planName"
+              className="mb-3"
+              required
+              value={formData.planName}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
-              Please provide terms and conditions.
+              Please provide additional details.
             </Form.Control.Feedback>
           </div>
-          {formData.id ? (
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>* Updated By</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Updated By"
-                name="updated_by"
-                className="mb-3"
-                required
-                value={formData.updated_by}
-                onChange={handleInputChange}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please provide the updated by information.
-              </Form.Control.Feedback>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "inline-block",
-                width: "48%",
-                marginRight: "8px",
-              }}
-            >
-              <Form.Label>* Created By</Form.Label>
-              <Form.Control
-                type="text"
-                autoComplete="off"
-                placeholder="Created By"
-                name="created_by"
-                className="mb-3"
-                required
-                value={formData.created_by}
-                onChange={handleInputChange}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please provide the created by information.
-              </Form.Control.Feedback>
-            </div>
-          )}
+          
         </Modal.Body>
         <Modal.Footer>
           <Button

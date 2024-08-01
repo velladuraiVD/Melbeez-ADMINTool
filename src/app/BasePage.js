@@ -27,6 +27,8 @@ import ApprovalPendingTable from "./pages/ModelDetails/ApprovalPendingTable";
 import ProductQueueTable from "./pages/ModelDetails/ProductQueueTable";
 import BulkUpload from "./pages/ModelDetails/BulkUpload";
 import Feed from "./pages/ModelDetails/Feed";
+import Warranty from"./pages/ModelDetails/Warranty";
+import WarrantyApproval from "./pages/ModelDetails/Warrantypendingapproval";
 
 const UserProfilepage = lazy(() =>
   import("./modules/UserProfile/UserProfilePage")
@@ -135,9 +137,14 @@ export default function BasePage() {
           <Route path="/activitylog" component={ActivityLogs} />
           <Route path="/model-details" component={AllData} />
           <Route path="/feed" component={Feed} />
-          <Route path="/product-queue" component={ProductQueueTable} /> 
-          <Route path="/approval-pending-table" component={ApprovalPendingTable} /> 
-          <Route path="/bulk-upload" component={BulkUpload} /> 
+          <Route path="/warranty" component={Warranty} />
+          <Route path="/warrantyapproval" component={WarrantyApproval} />
+          <Route path="/product-queue" component={ProductQueueTable} />
+          <Route
+            path="/approval-pending-table"
+            component={ApprovalPendingTable}
+          />
+          <Route path="/bulk-upload" component={BulkUpload} />
         </Switch>
       </Suspense>
       <Switch>{RoleRoute}</Switch>

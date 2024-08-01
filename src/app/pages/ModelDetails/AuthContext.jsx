@@ -1,17 +1,20 @@
 // AuthProvider.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authUserDetail } from '../../services/ProfileService';
-import { showSuccessToast, showErrorToast, showWarnToast } from '../../../Utility/toastMsg'; 
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authUserDetail } from "../../services/ProfileService";
+import {
+  showSuccessToast,
+  showErrorToast,
+  showWarnToast,
+} from "../../../Utility/toastMsg";
 
 const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider = ({ children }) => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -28,11 +31,10 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     fetchUserDetails();
   }, []);
 
-  const fetchShareLink = async (postId) => {
+  const fetchFeeds = async () => {
     try {
       if (!postId) {
         console.error("Invalid post ID");
@@ -66,24 +68,22 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       setPostData(data);
     } catch (error) {
-      showErrorToast("Error fetching data: " + error.message);
+      showErrorToast("No feed found");
+      // console.log(error)
     }
   };
-
   const handleUpload = async (formData, setMessage, setFormData, setShow) => {
     if (!formData.author) {
       setMessage("Author is required.");
       showWarnToast("Please fill in all required fields.");
       return;
     }
-
     if (!formData.file && !formData.description) {
       setMessage("Please provide either an image or a description.");
-      showWarnToast("Please provide either an image or a description.");
+      showWarnToast("Please provide image and description.");
       setShow(true);
       return;
     }
-
     const form = new FormData();
     form.append("author", formData.author);
     if (formData.file) {
@@ -95,94 +95,65 @@ export const AuthProvider = ({ children }) => {
     if (userDetails) {
       form.append("userId", userDetails.result.id);
     }
-
     try {
-      const response = await fetch('http://192.168.1.9:8083/upload', {
-        method: 'POST',
-        body: form,
-      });
-  
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/upload`,
+        {
+          method: "POST",
+          body: form,
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
+        setShow(true);
         setMessage(errorMessage);
         showErrorToast(errorMessage);
         return;
       }
-
-      showSuccessToast("Upload successful");
+      // setShow(false)
+      showSuccessToast("Upload feed successful");
       setFormData({
         author: "",
         description: "",
         file: null,
       });
-      // Don't close the modal if only a description is provided
-      if (formData.description && !formData.file) {
-        setShow(false);
-      }
+      // // Don't close the modal if only a description is provided
+      // if (formData.description && !formData.file) {
+      //   setShow(true);
+      //   showWarnToast("Please provide image and description.");
+      // }else{
+      // }
+      // Fetch feeds after successful upload
+      fetchFeeds();
     } catch (error) {
-      const errorMessage = "Error uploading file: " + error.message;
-      showErrorToast(errorMessage);
+      const errorMessage = "Error uploading file";
+      showWarnToast("Please provide image and description.");
       setMessage(errorMessage);
-      console.error(errorMessage);
+      // console.error(errorMessage);
       setShow(true);
     }
   };
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`http://192.168.1.9:8083/feeds/id/${postId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/feeds/id/${postId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete post");
       }
-
       setPostData((prevPosts) =>
         prevPosts.filter((post) => post.id !== postId)
       );
       showSuccessToast("Post deleted successfully");
     } catch (error) {
       showErrorToast("Error deleting post: " + error.message);
-    }
-  };
-
- 
-
-
-
-
-  const handleLikePost = async (postId) => {
-    try {
-      const response = await fetch(
-        `http://192.168.1.9:8083/feeds/${postId}/like`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userId: userDetails?.result.id }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        showWarnToast(errorData.message || "Failed to like post");
-        return;
-      }
-
-      const data = await response.json();
-
-      setPostData((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId ? { ...post, likes: data.likes } : post
-        )
-      );
-      setLikedPosts([...likedPosts, postId]);
-      showSuccessToast("Post liked successfully");
-    } catch (error) {
-      showErrorToast("Error liking post: " + error.message);
     }
   };
 
@@ -195,32 +166,43 @@ export const AuthProvider = ({ children }) => {
     // Check required fields
     if (
       !formData.vendor ||
-      !formData.productName ||
+      !formData.name ||
       !formData.monthlyPrice ||
-      !formData.annualPrice
+      !formData.annualPrice ||
+      !formData.discount ||
+      !formData.terms_conditions ||
+      !formData.status
     ) {
       setMessage("Please fill in all required fields.");
       showWarnToast("Please fill in all required fields.");
       return;
     }
 
-    // Construct FormData
-    const form = new FormData();
-    form.append("vendor", formData.vendor);
-    form.append("productName", formData.productName);
-    form.append("monthlyPrice", formData.monthlyPrice);
-    form.append("annualPrice", formData.annualPrice);
-    form.append("discount", formData.discount);
-    // form.append("picture", formData.file);
-    form.append("terms_conditions", formData.terms_conditions);
-    form.append("created_by", formData.created_by);
-    form.append("updated_by", formData.updated_by);
+    // Create JSON payload
+    const payload = {
+      // warrantyId: formData.warrantyId,
+      status: formData.status,
+      vendor: formData.vendor,
+      productName: formData.productName,
+      monthlyPrice: formData.monthlyPrice,
+      annualPrice: formData.annualPrice,
+      discount: formData.discount,
+      terms_conditions: formData.terms_conditions,
+      created_by: formData.created_by,
+      updated_by: formData.updated_by,
+    };
 
     try {
-      const response = await fetch("http://192.168.1.10:8080/warrentyUpload", {
-        method: "POST",
-        body: form,
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -230,58 +212,26 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      showSuccessToast("Upload successful");
+      // showSuccessToast("Upload successful");
       setFormData({
         vendor: "",
-        productName: "",
+        name: "",
         monthlyPrice: "",
         annualPrice: "",
         discount: "",
-        // file: null,
         terms_conditions: "",
         created_by: "",
         updated_by: "",
+        planDescription: "",
+        planName: "",
+        file: null,
       });
-      setShow(false);
-    } catch (error) {
-      const errorMessage = "Error uploading file: " + error.message;
-      showErrorToast(errorMessage);
-      setMessage(errorMessage);
-      console.error(errorMessage);
-      setShow(true);
-    }
+      // showSuccessToast("add success")
+      setShowAddModal(false);
+    } catch (error) {}
   };
 
-  const handleUpdateWarranty = async (
-    formData,
-    setMessage,
-    setFormData,
-    setShow
-  ) => {
-    // Check required fields
-    if (
-      !formData.vendor ||
-      !formData.productName ||
-      !formData.monthlyPrice ||
-      !formData.annualPrice
-    ) {
-      setMessage("Please fill in all required fields.");
-      showWarnToast("Please fill in all required fields.");
-      return;
-    }
-
-    // Construct FormData
-    const form = new FormData();
-    form.append("vendor", formData.vendor);
-    form.append("productName", formData.productName);
-    form.append("monthlyPrice", formData.monthlyPrice);
-    form.append("annualPrice", formData.annualPrice);
-    form.append("discount", formData.discount);
-    // form.append("picture", formData.file);
-    form.append("terms_conditions", formData.terms_conditions);
-    form.append("created_by", formData.created_by);
-    form.append("updated_by", formData.updated_by);
-
+  const handleUpdateWarranty = async (formData) => {
     try {
       const response = await fetch(
         `http://192.168.1.10:8080/warrentyUpdate/${formData.id}`,
@@ -290,28 +240,11 @@ export const AuthProvider = ({ children }) => {
           body: form,
         }
       );
-
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.error || "Unknown error occurred.";
-        setMessage(errorMessage);
-        showErrorToast(errorMessage);
-        return;
+        throw new Error("Failed to update warranty.");
       }
 
-      showSuccessToast("Update successful");
-      setFormData({
-        vendor: "",
-        productName: "",
-        monthlyPrice: "",
-        annualPrice: "",
-        discount: "",
-        // file: null,
-        terms_conditions: "",
-        created_by: "",
-        updated_by: "",
-      });
-      setShow(false);
+      return response.json(); // Optionally return data or handle success
     } catch (error) {
       const errorMessage = "Error updating warranty: " + error.message;
       showErrorToast(errorMessage);
@@ -320,7 +253,6 @@ export const AuthProvider = ({ children }) => {
       setShow(true);
     }
   };
-
   const handleDeleteWarranty = async (warrantyId) => {
     try {
       const response = await fetch(
@@ -329,11 +261,9 @@ export const AuthProvider = ({ children }) => {
           method: "DELETE",
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to delete warranty");
       }
-
       setPostData((prevPosts) =>
         prevPosts.filter((post) => post.id !== warrantyId)
       );
