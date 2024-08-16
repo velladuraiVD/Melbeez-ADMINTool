@@ -160,10 +160,12 @@ export const AuthProvider = ({ children }) => {
     form.append("monthlyPrice", formData.monthlyPrice);
     form.append("annualPrice", formData.annualPrice);
     form.append("discount", formData.discount || "0"); // Optional field
-    form.append("created_by", userDetails.result.firstName +" " +userDetails.result.lastName); // Use userId from userDetails
+    form.append("created_by", userDetails.result.firstName +" "+userDetails.result.lastName); // Use userId from userDetails
     form.append("updated_by", ""); // Use userId from userDetails
     form.append("planDescription", formData.planDescription);
     form.append("planName", formData.planName);
+    // form.append("productName",formData.productName);
+    // form.append("modelNumber",formData.modelNumber);
   
     // Append file if it exists
     if (formData.file) {

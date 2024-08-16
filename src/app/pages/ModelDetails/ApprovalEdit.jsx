@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 
@@ -12,6 +12,21 @@ const AddEditModalApproval = ({
 }) => {
 
   const [validated, setValidated] = useState(false);
+  useEffect(() => {
+    if (formData === undefined) {
+      setFormData({
+        vendor: "",
+        name: "",
+        monthlyPrice: "",
+        annualPrice: "",
+        discount: "",
+        status: "",
+        planDescription: "",
+        planName: "",
+        pictureLink: "",
+      });
+    }
+  }, [formData, setFormData]);
   const [fileError, setFileError] = useState("");
   const handleSubmitForm = async (e) => {
     e.preventDefault();
@@ -84,7 +99,7 @@ const AddEditModalApproval = ({
               name="vendor"
               className="mb-3"
               required
-              value={formData.vendor}
+              value={formData.vendor ||''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -107,7 +122,7 @@ const AddEditModalApproval = ({
               name="productName"
               className="mb-3"
               required
-              value={formData.name}
+              value={formData.name || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -131,7 +146,7 @@ const AddEditModalApproval = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.monthlyPrice}
+              value={formData.monthlyPrice || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -155,7 +170,7 @@ const AddEditModalApproval = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.annualPrice}
+              value={formData.annualPrice || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -179,7 +194,7 @@ const AddEditModalApproval = ({
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
               required
-              value={formData.discount}
+              value={formData.discount ||''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -198,7 +213,7 @@ const AddEditModalApproval = ({
               <Form.Control
                 as="select"
                 name="status"
-                value={formData.status}
+                value={formData.status || ''}
                 onChange={handleInputChange}
                 required
               >
@@ -221,7 +236,7 @@ const AddEditModalApproval = ({
               name="planDescription"
               className="mb-3"
               required
-              value={formData.planDescription}
+              value={formData.planDescription || ''}
               onChange={handlePlanDescriptionChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -244,7 +259,7 @@ const AddEditModalApproval = ({
               name="planName"
               className="mb-3"
               required
-              value={formData.planName}
+              value={formData.planName || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -257,7 +272,17 @@ const AddEditModalApproval = ({
             variant="secondary"
             onClick={() => {
               onHide();
-              setFormData({});
+              setFormData({
+                vendor: "",
+                name: "",
+                monthlyPrice: "",
+                annualPrice: "",
+                discount: "",
+                status: "",
+                planDescription: "",
+                planName: "",
+                pictureLink: "",
+              });
             }}
           >
             Close

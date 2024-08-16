@@ -21,18 +21,30 @@ const AddUpload = ({
     }
   }, [show]);
 
+  // Initialize formData with default values to avoid undefined inputs
+  const initialFormData = {
+    vendor: "",
+    name: "",
+    monthlyPrice: "",
+    annualPrice: "",
+    discount: "",
+    planDescription: "",
+    planName: "",
+    file: null,
+  };
+
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
 
     if (form.checkValidity() === false || !formData.file) {
       e.stopPropagation();
-      if (!formData.file) setFileError("File is required.");
+      if (!formData.file) setFileError("image is required.");
     } else {
       try {
         await handleSubmit(e);
         onHide();
-        setFormData(""); // Clear form data
+        setFormData(initialFormData); // Clear form data with default values
         // showSuccessToast("Upload successful.");
       } catch (error) {
         console.error("Error handling upload:", error);
@@ -114,7 +126,7 @@ const AddUpload = ({
               name="vendor"
               className="mb-3"
               required
-              value={formData.vendor}
+              value={formData.vendor || ""}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -136,7 +148,7 @@ const AddUpload = ({
               name="name"
               className="mb-3"
               required
-              value={formData.name}
+              value={formData.name || ""}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -159,7 +171,7 @@ const AddUpload = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.monthlyPrice}
+              value={formData.monthlyPrice || ""}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -182,7 +194,7 @@ const AddUpload = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.annualPrice}
+              value={formData.annualPrice || ""}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -204,12 +216,9 @@ const AddUpload = ({
               name="discount"
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.discount}
+              value={formData.discount || ""}
               onChange={handleInputChange}
             />
-            {/* <Form.Control.Feedback type="invalid">
-              Please provide a discount.
-            </Form.Control.Feedback> */}
           </div>
           <Form.Group>
             <Form.Label>* Plan Description</Form.Label>
@@ -217,10 +226,10 @@ const AddUpload = ({
               as="textarea"
               rows={3}
               name="planDescription"
-              placeholder="input must be separate by comma {Ex:Protect any phone, Accidental damage,}"
+              placeholder="input must be separated by a comma {Ex: Protect any phone, Accidental damage,}"
               className="mb-3"
               required
-              value={formData.planDescription}
+              value={formData.planDescription || ""}
               onChange={handlePlanDescriptionChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -242,7 +251,7 @@ const AddUpload = ({
               name="planName"
               className="mb-3"
               required
-              value={formData.planName}
+              value={formData.planName || ""}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -268,10 +277,13 @@ const AddUpload = ({
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary"   onClick={() => {
+          <Button
+            variant="secondary"
+            onClick={() => {
               onHide();
-              setFormData({});
-            }}>
+              setFormData(initialFormData); // Reset form data with default values
+            }}
+          >
             Close
           </Button>
           <Button variant="primary" type="submit">
