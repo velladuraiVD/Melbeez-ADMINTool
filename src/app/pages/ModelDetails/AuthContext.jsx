@@ -6,7 +6,6 @@ import {
   showErrorToast,
   showWarnToast,
 } from "../../../Utility/toastMsg";
-
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
@@ -15,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -33,35 +31,11 @@ export const AuthProvider = ({ children }) => {
     };
     fetchUserDetails();
   }, []);
-
   const fetchFeeds = async () => {
     try {
-      if (!postId) {
-        console.error("Invalid post ID");
-        return;
-      }
-
       const response = await fetch(
-        `http://192.168.1.13:5000/api/feedposts/${postId}/share`
+        `${process.env.REACT_APP_JAVA_API_URL}/feeds`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch shareable link");
-      }
-      const data = await response.json();
-      setShareLink(data.link);
-    } catch (error) {
-      console.error("Failed to generate shareable link", error);
-    }
-  };
-
-  useEffect(() => {
-    // Call fetchShareLink function here or whenever you need to fetch the share link
-    fetchShareLink();
-  }, [postData]); // Add dependencies as needed
-
-  const fetchFeeds = async () => {
-    try {
-      const response = await fetch("http://192.168.1.9:8083/feeds");
       if (!response.ok) {
         throw new Error("Failed to fetch feeds");
       }
@@ -103,7 +77,6 @@ export const AuthProvider = ({ children }) => {
           body: form,
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -135,7 +108,6 @@ export const AuthProvider = ({ children }) => {
       setShow(true);
     }
   };
-
   const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(
@@ -144,7 +116,6 @@ export const AuthProvider = ({ children }) => {
           method: "DELETE",
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to delete post");
       }
@@ -156,7 +127,6 @@ export const AuthProvider = ({ children }) => {
       showErrorToast("Error deleting post: " + error.message);
     }
   };
-
   const handleUploadwarrenty = async (
     formData,
     setMessage,
@@ -169,41 +139,48 @@ export const AuthProvider = ({ children }) => {
       !formData.name ||
       !formData.monthlyPrice ||
       !formData.annualPrice ||
-      !formData.discount ||
-      !formData.terms_conditions ||
-      !formData.status
+      !formData.planDescription ||
+      !formData.planName
     ) {
       setMessage("Please fill in all required fields.");
       showWarnToast("Please fill in all required fields.");
       return;
     }
-
-    // Create JSON payload
-    const payload = {
-      // warrantyId: formData.warrantyId,
-      status: formData.status,
-      vendor: formData.vendor,
-      productName: formData.productName,
-      monthlyPrice: formData.monthlyPrice,
-      annualPrice: formData.annualPrice,
-      discount: formData.discount,
-      terms_conditions: formData.terms_conditions,
-      created_by: formData.created_by,
-      updated_by: formData.updated_by,
-    };
-
+  
+    // Ensure userDetails is available and contains necessary information
+    if (!userDetails || !userDetails.result || !userDetails.result.id) {
+      showErrorToast("User details not found.");
+      return;
+    }
+  
+    // Create FormData payload
+    const form = new FormData();
+    form.append("vendor", formData.vendor);
+    form.append("name", formData.name);
+    form.append("monthlyPrice", formData.monthlyPrice);
+    form.append("annualPrice", formData.annualPrice);
+    form.append("discount", formData.discount || "0"); // Optional field
+    form.append("created_by", userDetails.result.firstName +" "+userDetails.result.lastName); // Use userId from userDetails
+    form.append("updated_by", ""); // Use userId from userDetails
+    form.append("planDescription", formData.planDescription);
+    form.append("planName", formData.planName);
+    // form.append("productName",formData.productName);
+    // form.append("modelNumber",formData.modelNumber);
+  
+    // Append file if it exists
+    if (formData.file) {
+      form.append("file", formData.file);
+    }
+  
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          body: form,
         }
       );
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -211,52 +188,53 @@ export const AuthProvider = ({ children }) => {
         showErrorToast(errorMessage);
         return;
       }
-
-      // showSuccessToast("Upload successful");
+  
       setFormData({
         vendor: "",
         name: "",
         monthlyPrice: "",
         annualPrice: "",
         discount: "",
-        terms_conditions: "",
         created_by: "",
         updated_by: "",
         planDescription: "",
         planName: "",
         file: null,
       });
-      // showSuccessToast("add success")
       setShowAddModal(false);
-    } catch (error) {}
+      showSuccessToast("Upload successful");
+    } catch (error) {
+      // setMessage("Error uploading warranty");
+      // showErrorToast("Error uploading warranty: " + error.message);
+      // setShow(true);
+    }
   };
-
+  
+  
   const handleUpdateWarranty = async (formData) => {
     try {
       const response = await fetch(
-        `http://192.168.1.10:8080/warrentyUpdate/${formData.id}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/${formData.id}`,
         {
           method: "PUT",
-          body: form,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         }
       );
       if (!response.ok) {
         throw new Error("Failed to update warranty.");
       }
-
       return response.json(); // Optionally return data or handle success
     } catch (error) {
-      const errorMessage = "Error updating warranty: " + error.message;
-      showErrorToast(errorMessage);
-      setMessage(errorMessage);
-      console.error(errorMessage);
-      setShow(true);
+      throw new Error(error.message); // Throw error to be caught by the calling component
     }
   };
   const handleDeleteWarranty = async (warrantyId) => {
     try {
       const response = await fetch(
-        `http://192.168.1.10:8080/warrentyDelete/${warrantyId}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/warrenty/${warrantyId}`,
         {
           method: "DELETE",
         }
@@ -273,7 +251,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
   return (
-    <AuthContext.Provider value={{ userDetails, loading, error, handleUpload, postData, fetchFeeds, handleDeletePost }}>
+    <AuthContext.Provider
+      value={{
+        userDetails,
+        loading,
+        error,
+        handleUpload,
+        postData,
+        fetchFeeds,
+        handleDeletePost,
+        handleUploadwarrenty,
+        handleUpdateWarranty,
+        handleDeleteWarranty,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

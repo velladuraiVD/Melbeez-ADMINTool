@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Table, Popover, Form, Alert } from "react-bootstrap";
 import { TablePagination } from "@material-ui/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import ActionButtons from "./ActionButttons";
+import ActionButtonwarranty from "./ActionButtonwarranty";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faSearch } from "@fortawesome/free-solid-svg-icons";
+
 
 const WarrantyTable = ({
   columns,
@@ -13,7 +14,10 @@ const WarrantyTable = ({
   handleEdit,
   handleDelete,
   paginate,
+  handlePending,
+
   handleRowClick,
+  // handlePendingSubmission
 }) => {
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
   const [searchQueries, setSearchQueries] = useState({});
@@ -35,11 +39,13 @@ const WarrantyTable = ({
       ? {
           ...column,
           formatter: (cell, row) => (
-            <ActionButtons
+            <ActionButtonwarranty
+            handlePending={handlePending}
               row={row}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onView={handleRowClick}
+              // handlePendingSubmission={handlePendingSubmission}
             />
           ),
         }
@@ -71,6 +77,11 @@ const WarrantyTable = ({
     })
   );
 
+  const rowEvents = {
+    onClick: (e, row, rowIndex) => {
+      handleRowClick(row);
+    },
+  };
   return (
     <>
       {filteredData.length === 0 ? (
@@ -80,7 +91,7 @@ const WarrantyTable = ({
           <Table
             className="table table-head-custom table-vertical-center overflow-hidden"
             hover
-            condensed
+         condensed="true"
           >
             <thead>
               <tr>

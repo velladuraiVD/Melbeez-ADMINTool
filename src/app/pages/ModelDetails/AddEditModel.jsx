@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 
@@ -10,8 +10,30 @@ const AddEditModal = ({
   handleSubmit,
   setFormData,
 }) => {
+
+
+
   const [validated, setValidated] = useState(false);
   const [fileError, setFileError] = useState("");
+
+
+
+  useEffect(() => {
+    if (formData === undefined) {
+      setFormData({
+        vendor: "",
+        name: "",
+        monthlyPrice: "",
+        annualPrice: "",
+        discount: "",
+        status: "",
+        planDescription: "",
+        planName: "",
+        pictureLink: "",
+      });
+    }
+  }, [formData, setFormData]);
+
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -20,7 +42,7 @@ const AddEditModal = ({
       e.stopPropagation();
     } else {
       try {
-        await handleSubmit(e); // Call handleSubmit function passed from parent
+        await handleSubmit(e);   // Call handleSubmit function passed from parent
 
         onHide(); // Close modal
       } catch (error) {
@@ -85,7 +107,7 @@ const AddEditModal = ({
               name="vendor"
               className="mb-3"
               required
-              value={formData.vendor}
+              value={formData.vendor || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -107,7 +129,7 @@ const AddEditModal = ({
               name="name"
               className="mb-3"
               required
-              value={formData.name}
+              value={formData.name || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -130,7 +152,7 @@ const AddEditModal = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.monthlyPrice}
+              value={formData.monthlyPrice ||''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -153,7 +175,7 @@ const AddEditModal = ({
               className="mb-3"
               required
               pattern="^\d*(\.\d{0,2})?$"
-              value={formData.annualPrice}
+              value={formData.annualPrice || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -176,7 +198,7 @@ const AddEditModal = ({
               className="mb-3"
               pattern="^\d*(\.\d{0,2})?$"
               required
-              value={formData.discount}
+              value={formData.discount || ''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -190,27 +212,7 @@ const AddEditModal = ({
               marginRight: "8px",
             }}
           >
-            <Form.Label>* Status</Form.Label>
-            <Form.Control
-              as="select"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              required
-            >
-              {formData.status === "Pending" && (
-                <>
-                  <option value="Pending">Pending</option>
-                </>
-              )}
-              {formData.status !== "Pending" && (
-                <>
-                  {/* <option value="">Select</option> */}
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </>
-              )}
-            </Form.Control>
+          
             <Form.Control.Feedback type="invalid">
               Please select a status.
             </Form.Control.Feedback>
@@ -223,7 +225,7 @@ const AddEditModal = ({
               name="planDescription"
               className="mb-3"
               required
-              value={formData.planDescription}
+              value={formData.planDescription || ''}
               onChange={handlePlanDescriptionChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -245,7 +247,7 @@ const AddEditModal = ({
               name="planName"
               className="mb-3"
               required
-              value={formData.planName}
+              value={formData.planName ||''}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -259,7 +261,17 @@ const AddEditModal = ({
             variant="secondary"
             onClick={() => {
               onHide();
-              setFormData({});
+              setFormData({
+                vendor: "",
+                name: "",
+                monthlyPrice: "",
+                annualPrice: "",
+                discount: "",
+                status: "",
+                planDescription: "",
+                planName: "",
+                pictureLink: "",
+              });
             }}
           >
             Close
