@@ -59,6 +59,7 @@
         "date-fns": "2.8.1",
         "decode-uri-component": "^0.2.0",
         "decodeuricomponent": "^0.3.1",
+        "demo1": "file:",
         "downshift": "3.4.2",
         "fg-loadcss": "2.1.0",
         "formik": "2.1.4",

@@ -101,19 +101,21 @@ const WarrantyProductQueueTable = ({
   const [showPendingModal, setShowPendingModal] = useState(false);
   const handlePending = (row) => {
     setFormData({
-      warrantyId: row.warrantyId,
+      // warrantyId: row.warrantyId,
       status: row.status,
       id: row.id,
-      vendor: row.vendor,
-      name: row.name,
-      monthlyPrice: row.monthlyPrice,
-      annualPrice: row.annualPrice,
-      discount: row.discount,
-      planDescription: row.planDescription,
-      planName: row.planName,
-      pictureLink: row.pictureLink,
-      updated_by:
-        userDetails.result.firstName + " " + userDetails.result.lastName,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // other_Details:row.other_Details,
+      // product_price_ids:row.product_price_ids,
+      // updated_by:
+      //   userDetails.result.firstName + " " + userDetails.result.lastName,
     });
     setShowPendingModal(true); // Assume you have a modal for confirming pending status
   };
@@ -150,8 +152,8 @@ const WarrantyProductQueueTable = ({
     name: "",
     monthlyPrice: "",
     annualPrice: "",
-    // modelNumber:"",
-    // productName:"",
+    other_Details: "",
+    product_price_ids: "",
     discount: "",
     status: "",
     planDescription: "", // Clear planDescription field
@@ -224,6 +226,8 @@ const WarrantyProductQueueTable = ({
       planDescription: row.planDescription,
       planName: row.planName,
       pictureLink: row.pictureLink,
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
       // terms_conditions: row.terms_conditions,
       // created_by: row.created_by,
       // updated_by: row.updated_by,
@@ -247,7 +251,10 @@ const WarrantyProductQueueTable = ({
       discount: row.discount,
       planDescription: row.planDescription,
       planName: row.planName,
-      status:'Pending',
+      status: "Pending",
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
+
       // terms_conditions: row.terms_conditions,
       // created_by: row.created_by,
       updated_by:
@@ -304,7 +311,7 @@ const WarrantyProductQueueTable = ({
 
   const handleFilter = (e) => {
     const filterValue = e.target.value;
-  
+
     if (filterValue === "") {
       // If no filter is selected, show all data
       setFilteredData(warrantyData);
@@ -316,7 +323,6 @@ const WarrantyProductQueueTable = ({
       setFilteredData(filtered);
     }
   };
-  
 
   const exportToExcel = () => {
     try {

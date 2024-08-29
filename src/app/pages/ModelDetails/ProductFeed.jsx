@@ -8,6 +8,7 @@ import {
 import { Button, Modal, Form } from "react-bootstrap";
 import FeedCard from "./FeedCard";
 import { useAuth } from "./AuthContext";
+
 export default function ProductFeed({
   status = 0,
   title = "Product feed",
@@ -21,7 +22,9 @@ export default function ProductFeed({
     description: "",
     file: null,
   });
+  const [fileError, setFileError] = useState("");
   const { userDetails, loading, handleUpload } = useAuth();
+
   useEffect(() => {
     if (!loading && userDetails && !formData.author) {
       const fullName = `${userDetails.result.firstName} ${userDetails.result.lastName}`;
@@ -31,36 +34,76 @@ export default function ProductFeed({
       }));
     }
   }, [userDetails, loading, formData.author]);
+
   const handleClose = () => {
     setFormData({
       author: formData.author,
       description: "",
       file: null,
     });
+    setFileError("");
     setShow(false);
   };
+
   const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      file: e.target.files[0],
-    });
+    const file = e.target.files[0];
+    const fileTypes = ["image/jpeg", "image/png", "image/gif"];
+
+    if (file) {
+      if (file.size > 1 * 1024 * 1024) { // Allow only up to 1 MB
+        setFileError("File size should not exceed 1 MB.");
+        setFormData({
+          ...formData,
+          file: null,
+        });
+      } else if (!fileTypes.includes(file.type)) {
+        setFileError("Only image files are allowed.");
+        setFormData({
+          ...formData,
+          file: null,
+        });
+      } else {
+        setFileError("");
+        setFormData({
+          ...formData,
+          file,
+        });
+      }
+    } else {
+      setFileError("File is required.");
+      setFormData({
+        ...formData,
+        file: null,
+      });
+    }
   };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+
   const showModal = () => {
     setShow(true);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.file) {
+      setFileError("File is required.");
+      return;
+    }
+
     try {
       await handleUpload(formData, setMessage, setFormData);
       handleClose();
     } catch (error) {}
   };
+
+  
+
   return (
     <>
       <Card style={{ marginTop: "0px" }}>
@@ -127,7 +170,9 @@ export default function ProductFeed({
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+              
               />
+              
             </div>
             <div
               style={{
@@ -139,6 +184,7 @@ export default function ProductFeed({
               <Form.Label>Image</Form.Label>
               <div className="border border-gray-100 border-2 p-2 w-60">
                 <input type="file" id="file" onChange={handleFileChange} />
+                {fileError && <div className="text-danger mt-2">{fileError}</div>}
               </div>
             </div>
             <br />

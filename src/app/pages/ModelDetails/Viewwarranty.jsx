@@ -14,6 +14,8 @@ const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
         planDescription: "",
         planName: "",
         pictureLink: "",
+        other_Details:"",
+        product_price_ids:"",
       });
     }
   }, [formData, setFormData]);
@@ -66,14 +68,28 @@ const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
             </div>
             <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
               <Form.Group>
+                <Form.Label>Price id</Form.Label>
+                <Form.Control type="text" disabled value={formData.product_price_ids || ""} />
+              </Form.Group>
+            </div>
+
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
                 <Form.Label>Status</Form.Label>
                 <Form.Control type="text" disabled value={formData.status || ""} />
               </Form.Group>
             </div>
-            <div className="p-2 flex-fill" style={{ width: "100%" }}>
+            <div className="p-2 flex-fill" style={{ width: "48%" }}>
               <Form.Group>
                 <Form.Label>Plan Description</Form.Label>
-                <Form.Control as="textarea" disabled rows={3} value={formData.planDescription || ""} />
+                <Form.Control type="text" disabled rows={3} value={formData.planDescription || ""} />
+              </Form.Group>
+            </div>
+           
+            <div className="p-2 flex-fill" style={{ width: "100%" }}>
+              <Form.Group>
+                <Form.Label>Others</Form.Label>
+                <Form.Control as="textarea" disabled rows={3} value={formData.other_Details || ""} />
               </Form.Group>
             </div>
             <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>

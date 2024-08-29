@@ -31,6 +31,8 @@ const AddUpload = ({
     planDescription: "",
     planName: "",
     file: null,
+    other_Details: "",
+    product_price_ids: "",
   };
 
   const handleSubmitForm = async (e) => {
@@ -57,11 +59,12 @@ const AddUpload = ({
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    const fileTypes = ["image/jpeg", "image/png", "image/gif"];
+    const fileTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
 
     if (file) {
-      if (file.size > 4 * 1024 * 1024) {
-        setFileError("File size should not exceed 4 MB.");
+      if (file.size > 1 * 1024 * 1024) {
+        // Allow only up to 1 MB
+        setFileError("File size should not exceed 1 MB.");
         setFormData({
           ...formData,
           file: null,
@@ -128,6 +131,7 @@ const AddUpload = ({
               required
               value={formData.vendor || ""}
               onChange={handleInputChange}
+              pattern="[a-zA-Z\s]*"
             />
             <Form.Control.Feedback type="invalid">
               Please provide a vendor name.
@@ -150,6 +154,7 @@ const AddUpload = ({
               required
               value={formData.name || ""}
               onChange={handleInputChange}
+              pattern="[a-zA-Z\s]*"
             />
             <Form.Control.Feedback type="invalid">
               Please provide a product name.
@@ -220,16 +225,62 @@ const AddUpload = ({
               onChange={handleInputChange}
             />
           </div>
+
+          <div
+            style={{
+              display: "inline-block",
+              width: "48%",
+              marginRight: "8px",
+            }}
+          >
+            <Form.Label>* Price Id</Form.Label>
+            <Form.Control
+              type="text"
+              autoComplete="off"
+              placeholder="Price Id"
+              name="product_price_ids"
+              className="mb-3"
+              pattern="^\d*(\.\d{0,2})?$"
+              value={formData.product_price_ids || ""}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div
+            style={{
+              display: "inline-block",
+              width: "100%",
+              marginRight: "8px",
+            }}
+          >
+            <Form.Label>* Plan description</Form.Label>
+            <Form.Control
+              type="text"
+              autoComplete="off"
+              placeholder="Plan description"
+              name="planDescription"
+              className="mb-3"
+              // pattern="^\d*(\.\d{0,2})?$"
+              value={formData.planDescription || ""}
+              onChange={handleInputChange}
+              // pattern="[a-zA-Z\s]*"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              Please provide a valid Plan description.
+            </Form.Control.Feedback>
+          </div>
           <Form.Group>
-            <Form.Label>* Plan Description</Form.Label>
+            <Form.Label>* Ohers</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
-              name="planDescription"
+              name="other_Details"
               placeholder="input must be separated by a comma {Ex: Protect any phone, Accidental damage,}"
               className="mb-3"
               required
-              value={formData.planDescription || ""}
+              value={formData.other_Details || ""}
               onChange={handlePlanDescriptionChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -253,6 +304,7 @@ const AddUpload = ({
               required
               value={formData.planName || ""}
               onChange={handleInputChange}
+              pattern="[a-zA-Z\s]*"
             />
             <Form.Control.Feedback type="invalid">
               Please provide additional details.

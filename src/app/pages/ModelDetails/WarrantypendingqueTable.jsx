@@ -186,7 +186,6 @@ const WarrantypendingqueTable = ({
       );
     }
   };
-  
 
   const [showAddModel, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -207,6 +206,8 @@ const WarrantypendingqueTable = ({
     // created_by: "",
     updated_by: "",
     file: null, // Clear the image file field
+    other_Details: "",
+    product_price_ids: "",
   });
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
@@ -272,6 +273,8 @@ const WarrantypendingqueTable = ({
       // terms_conditions: row.terms_conditions,
       created_by: row.created_by,
       updated_by: row.updated_by,
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
     });
     setShowViewModal(true);
   };
@@ -301,38 +304,42 @@ const WarrantypendingqueTable = ({
 
   const handleApproval = (row) => {
     setFormData({
-      warrantyId: row.warrantyId,
+      // warrantyId: row.warrantyId,
       status: row.status,
       id: row.id,
-      vendor: row.vendor,
-      name: row.name,
-      monthlyPrice: row.monthlyPrice,
-      annualPrice: row.annualPrice,
-      discount: row.discount,
-      planDescription: row.planDescription,
-      planName: row.planName,
-      pictureLink: row.pictureLink,
-      updated_by:
-        userDetails.result.firstName + "" + userDetails.result.lastName,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // updated_by:
+      //   userDetails.result.firstName + "" + userDetails.result.lastName,
+      // other_Details: row.other_Details,
+      // product_price_ids: row.product_price_ids,
     });
     setShowApprovalModal(true);
   };
 
   const handleReject = (row) => {
     setFormData({
-      warrantyId: row.warrantyId,
+      // warrantyId: row.warrantyId,
       status: row.status,
       id: row.id,
-      vendor: row.vendor,
-      name: row.name,
-      monthlyPrice: row.monthlyPrice,
-      annualPrice: row.annualPrice,
-      discount: row.discount,
-      planDescription: row.planDescription,
-      planName: row.planName,
-      pictureLink: row.pictureLink,
-      updated_by:
-        userDetails.result.firstName + "" + userDetails.result.lastName,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // updated_by:
+      //   userDetails.result.firstName + "" + userDetails.result.lastName,
+      // other_Details: row.other_Details,
+      // product_price_ids: row.product_price_ids,
     });
     setShowRejectionModal(true);
   };
@@ -456,8 +463,7 @@ const WarrantypendingqueTable = ({
               {selectedIds.length > 0 && (
                 <>
                   <Button
-                   className="btn btn-primary ml-2 mr-1"
-                  
+                    className="btn btn-primary ml-2 mr-1"
                     onClick={() => setShowApprovalModal(true)}
                   >
                     Approve All
@@ -507,7 +513,7 @@ const WarrantypendingqueTable = ({
 
         <CardBody style={{ justifyContent: "center" }}>
           <WarrantypendingapprovalTable
-           onSelectionChange={handleSelectionChange}
+            onSelectionChange={handleSelectionChange}
             columns={columns}
             data={filteredData}
             currentPage={currentPage}
@@ -525,7 +531,6 @@ const WarrantypendingqueTable = ({
             show={showApprovalModal}
             onHide={() => setShowApprovalModal(false)}
             onClick={() => handleBulkSubmit("approve")}
-
             onSubmit={(e) => handleSubmit(e, "approve")}
           />
           <RejectionModal
