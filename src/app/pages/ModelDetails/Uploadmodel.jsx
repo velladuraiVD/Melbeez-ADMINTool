@@ -240,7 +240,7 @@ const AddUpload = ({
               placeholder="Price Id"
               name="product_price_ids"
               className="mb-3"
-              pattern="^\d*(\.\d{0,2})?$"
+              // pattern="^\d*(\.\d{0,2})?$"
               value={formData.product_price_ids || ""}
               onChange={handleInputChange}
               required
