@@ -140,6 +140,8 @@ export const AuthProvider = ({ children }) => {
       !formData.monthlyPrice ||
       !formData.annualPrice ||
       !formData.planDescription ||
+      !formData.other_Details||
+      !formData.product_price_ids||
       !formData.planName
     ) {
       setMessage("Please fill in all required fields.");
@@ -160,10 +162,12 @@ export const AuthProvider = ({ children }) => {
     form.append("monthlyPrice", formData.monthlyPrice);
     form.append("annualPrice", formData.annualPrice);
     form.append("discount", formData.discount || "0"); // Optional field
-    form.append("created_by", userDetails.result.firstName +" " +userDetails.result.lastName); // Use userId from userDetails
+    form.append("created_by", userDetails.result.firstName +" "+userDetails.result.lastName); // Use userId from userDetails
     form.append("updated_by", ""); // Use userId from userDetails
     form.append("planDescription", formData.planDescription);
     form.append("planName", formData.planName);
+    form.append("product_price_ids",formData.product_price_ids);
+    form.append("other_Details",formData.other_Details);
   
     // Append file if it exists
     if (formData.file) {
@@ -197,6 +201,8 @@ export const AuthProvider = ({ children }) => {
         updated_by: "",
         planDescription: "",
         planName: "",
+        other_Details:"",
+        product_price_ids:"",
         file: null,
       });
       setShowAddModal(false);

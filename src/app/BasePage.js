@@ -29,6 +29,7 @@ import BulkUpload from "./pages/ModelDetails/BulkUpload";
 import Feed from "./pages/ModelDetails/Feed";
 import Warranty from"./pages/ModelDetails/Warranty";
 import WarrantyApproval from "./pages/ModelDetails/Warrantypendingapproval";
+import PaymentTable from "./pages/ModelDetails/PaymentTable";
 
 const UserProfilepage = lazy(() =>
   import("./modules/UserProfile/UserProfilePage")
@@ -138,6 +139,7 @@ export default function BasePage() {
           <Route path="/model-details" component={AllData} />
           <Route path="/feed" component={Feed} />
           <Route path="/warranty" component={Warranty} />
+          {/* <Route path="/payment" component={PaymentTable} /> */}
           <Route path="/warrantyapproval" component={WarrantyApproval} />
           <Route path="/product-queue" component={ProductQueueTable} />
           <Route

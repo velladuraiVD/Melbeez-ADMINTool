@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Table, Popover, Form, Alert } from "react-bootstrap"; // Import Alert from react-bootstrap
+import { Table, Form } from "react-bootstrap"; 
 import { TablePagination } from "@material-ui/core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import ActionButtons from "./ActionButttons";
 
 const WarrantypendingapprovalTable = ({
@@ -10,18 +8,19 @@ const WarrantypendingapprovalTable = ({
   data,
   currentPage,
   itemsPerPage: initialItemsPerPage,
+  handleApproval,
   handleEdit,
   handleDelete,
   paginate,
   handleRowClick,
+  handleReject,
+  onSelectionChange, 
 }) => {
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
   const [searchQueries, setSearchQueries] = useState({});
-  const [openPopoverId, setOpenPopoverId] = useState(null); // Track open popover id
+  const [selectedIds, setSelectedIds] = useState([]);
   const searchInputRefs = useRef(columns.map(() => React.createRef()));
-  const [showViewModal, setShowViewModal] = useState(false); // Modal visibility state
 
-  // Sort the data by the 'createdAt' field in descending order (newest first)
   const sortedData = data.sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
@@ -39,7 +38,9 @@ const WarrantypendingapprovalTable = ({
               row={row}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              onView={handleRowClick}
+              onView={() => handleRowClick(row)} // Use function to prevent immediate invocation
+              handleApproval={handleApproval}
+              handleReject={handleReject}
             />
           ),
         }
@@ -57,11 +58,9 @@ const WarrantypendingapprovalTable = ({
       if (query && column.dataField !== "actions") {
         const cellValue = item[column.dataField];
 
-        // Check if the cell value includes the query (case insensitive)
         if (typeof cellValue === "string") {
           return cellValue.toLowerCase().includes(query.toLowerCase());
         } else if (typeof cellValue === "number") {
-          // If cell value is a number, convert to string and check includes
           return cellValue.toString().includes(query);
         }
 
@@ -71,21 +70,40 @@ const WarrantypendingapprovalTable = ({
     })
   );
 
+  const handleSelectAll = (e) => {
+    const newSelectedIds = e.target.checked
+      ? filteredData.map((item) => item.id)
+      : [];
+    
+    setSelectedIds(newSelectedIds);
+    onSelectionChange(newSelectedIds); // Notify parent of selection change
+  };
+
   return (
     <>
       {filteredData.length === 0 ? (
-      <div className="text-center text-danger mt-4">
-      No  pending data  found !
-    </div>
+        <div className="text-center text-danger mt-4">
+          No pending data found!
+        </div>
       ) : (
         <div className="table-responsive">
           <Table
             className="table table-head-custom table-vertical-center overflow-hidden"
             hover
-            condensed
+            condensed="true"
           >
             <thead>
               <tr>
+                <th>
+                  <Form.Check
+                    type="checkbox"
+                    onChange={handleSelectAll}
+                    checked={
+                      filteredData.length > 0 &&
+                      selectedIds.length === filteredData.length
+                    }
+                  />
+                </th>
                 {columnsWithActions.map((column, index) => (
                   <th key={index}>{column.text}</th>
                 ))}
@@ -93,7 +111,21 @@ const WarrantypendingapprovalTable = ({
             </thead>
             <tbody>
               {filteredData.map((item, index) => (
-                <tr key={index}>
+                <tr key={item.id}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={selectedIds.includes(item.id)}
+                      onChange={() => {
+                        const newSelectedIds = selectedIds.includes(item.id)
+                          ? selectedIds.filter((id) => id !== item.id)
+                          : [...selectedIds, item.id];
+
+                        setSelectedIds(newSelectedIds);
+                        onSelectionChange(newSelectedIds); // Notify parent of selection change
+                      }}
+                    />
+                  </td>
                   {columnsWithActions.map((column, columnIndex) => (
                     <td key={columnIndex}>
                       {column.formatter
@@ -108,16 +140,13 @@ const WarrantypendingapprovalTable = ({
         </div>
       )}
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]} // Options for rows per page
+        rowsPerPageOptions={[5, 10, 25, 50]} 
         component="div"
         count={sortedData.length}
         rowsPerPage={itemsPerPage}
         page={currentPage - 1}
         onChangePage={(e, newPage) => paginate(newPage + 1)}
-        onChangeRowsPerPage={handleChangeRowsPerPage} // Handle change in rows per page
-        // rowEvents={{
-        //   onClick: (e, row) => handleRowClick(row),
-        // }}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
       />
     </>
   );

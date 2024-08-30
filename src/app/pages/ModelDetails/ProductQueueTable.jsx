@@ -79,8 +79,8 @@ export default function ProductQueueTable({
   const [submitShow, setSubmitShow] = useState(false);
   const [isViewData, setIsViewData] = useState(false);
   const [isDraftFlag, setIsDraftFlag] = useState(false);
-  const [categoryNameOnChange, setCategoryNameOnChange] = useState('');
-  const [categoryIdonClick, setCategoryIdonClick] = useState('');
+  const [categoryNameOnChange, setCategoryNameOnChange] = useState("");
+  const [categoryIdonClick, setCategoryIdonClick] = useState("");
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -109,7 +109,7 @@ export default function ProductQueueTable({
               // setCategoryInputs(JSON.parse(row?.formBuilderData));
               setCategoryNameOnSelection(row?.categoryName);
               setIsEditFlag(true);
-              setIsViewData(false)
+              setIsViewData(false);
             }}
           >
             <span className="svg-icon svg-icon-md svg-icon-primary">
@@ -156,7 +156,7 @@ export default function ProductQueueTable({
             // console.log("delete", row?.categoryId)
             let categoryIdonSelect = row.categoryId;
             showDeleteModal(e, categoryIdonSelect);
-            setCategoryIdonClick(row?.id)
+            setCategoryIdonClick(row?.id);
             // console.log(row)
           }}
         >
@@ -286,7 +286,7 @@ export default function ProductQueueTable({
         "Input must be in the format of key-value pairs e.g - Name: John;",
         (value) => {
           if (!value) return true;
-          // const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;  
+          // const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
           const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
           return keyValuePattern.test(value);
         }
@@ -320,7 +320,9 @@ export default function ProductQueueTable({
       let bodyParams = {
         modelNumber: values?.modelNumber,
         manufacturerName: values?.manufacturerName,
-        categoryName: categoryNameOnChange ? categoryNameOnChange : rowData?.categoryName,
+        categoryName: categoryNameOnChange
+          ? categoryNameOnChange
+          : rowData?.categoryName,
         categoryId: values?.categoryName,
         productName: values?.productName,
         otherInfo: values.others,
@@ -335,7 +337,7 @@ export default function ProductQueueTable({
               dispatch(addCategoriesData(values));
               showSuccessToast(res.message);
               handleClose();
-              resetForm()
+              resetForm();
               if (editFormRef && editFormRef.current) {
                 editFormRef.current.resetForm();
               }
@@ -355,7 +357,7 @@ export default function ProductQueueTable({
               dispatch(addCategoriesData(values));
               showSuccessToast(res.message);
               handleClose();
-              resetForm()
+              resetForm();
             }
           })
           .catch((error) => {
@@ -425,11 +427,11 @@ export default function ProductQueueTable({
   // };
 
   const handleCategoryChange = (e) => {
-    handleChange(e)
+    handleChange(e);
     let categoryName = e.target.options[e.target.selectedIndex].textContent;
     setCategoryNameOnChange(categoryName);
-    setFieldError("others", "")
-  }
+    setFieldError("others", "");
+  };
   const columns = [
     {
       dataField: "manufacturerName",
@@ -447,7 +449,7 @@ export default function ProductQueueTable({
       dataField: "categoryName",
       text: "Category Name",
       headerSortingClasses,
-      formatter: CategoryNameFormatter
+      formatter: CategoryNameFormatter,
     },
     {
       dataField: "productName",

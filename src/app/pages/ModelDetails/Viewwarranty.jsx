@@ -1,7 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
+  useEffect(() => {
+    if (formData === undefined) {
+      setFormData({
+        vendor: "",
+        name: "",
+        monthlyPrice: "",
+        annualPrice: "",
+        discount: "",
+        status: "",
+        planDescription: "",
+        planName: "",
+        pictureLink: "",
+        other_Details:"",
+        product_price_ids:"",
+      });
+    }
+  }, [formData, setFormData]);
+
   return (
     <Modal
       show={show}
@@ -17,127 +35,103 @@ const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
       </Modal.Header>
       <Form>
         <Modal.Body>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Vendor Name</Form.Label>
-              <Form.Control type="text" readOnly value={formData.vendor} />
-            </Form.Group>
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control type="text" value={formData.name} readOnly />
-            </Form.Group>
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Monthly Price</Form.Label>
-              <Form.Control
-                type="text"
-                readOnly
-                value={formData.monthlyPrice}
-              />
-            </Form.Group>
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Annual Price</Form.Label>
-              <Form.Control type="text" readOnly value={formData.annualPrice} />
-            </Form.Group>
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Discount</Form.Label>
-              <Form.Control type="text" readOnly value={formData.discount} />
-            </Form.Group>
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Status</Form.Label>
-              <Form.Control type="text" readOnly value={formData.status} />
-            </Form.Group>
-          </div>
-          <Form.Group>
-            <Form.Label>Plan Description</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              readOnly
-              value={formData.planDescription}
-            />
-          </Form.Group>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Label>Plan Name</Form.Label>
-            <Form.Control
-              readOnly
-              type="text"
-              autoComplete="off"
-              placeholder="Plan Name"
-              name="planName"
-              className="mb-3"
-              required
-              value={formData.planName}
-            />
-          </div>
-          <div
-            style={{
-              display: "inline-block",
-              width: "48%",
-              marginRight: "8px",
-            }}
-          >
-            <Form.Group>
-              <Form.Label>Warranty Image</Form.Label>
-              <div>
-                <img
-                  src={formData.pictureLink}
-                  alt="Uploaded"
-                  style={{ maxWidth: "100%", maxHeight: "400px" }}
+          <div className="d-flex flex-wrap">
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Vendor Name</Form.Label>
+                <Form.Control type="text" disabled value={formData.vendor || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Name</Form.Label>
+                <Form.Control type="text" disabled value={formData.name || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Monthly Price</Form.Label>
+                <Form.Control type="text" disabled value={formData.monthlyPrice || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Annual Price</Form.Label>
+                <Form.Control type="text" disabled value={formData.annualPrice || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Discount</Form.Label>
+                <Form.Control type="text" disabled value={formData.discount || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Price id</Form.Label>
+                <Form.Control type="text" disabled value={formData.product_price_ids || ""} />
+              </Form.Group>
+            </div>
+
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Status</Form.Label>
+                <Form.Control type="text" disabled value={formData.status || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ width: "48%" }}>
+              <Form.Group>
+                <Form.Label>Plan Description</Form.Label>
+                <Form.Control type="text" disabled rows={3} value={formData.planDescription || ""} />
+              </Form.Group>
+            </div>
+           
+            <div className="p-2 flex-fill" style={{ width: "100%" }}>
+              <Form.Group>
+                <Form.Label>Others</Form.Label>
+                <Form.Control as="textarea" disabled rows={3} value={formData.other_Details || ""} />
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Plan Name</Form.Label>
+                <Form.Control
+                  disabled
+                  type="text"
+                  autoComplete="off"
+                  placeholder="Plan Name"
+                  name="planName"
+                  className="mb-3"
+                  required
+                  value={formData.planName || ""}
                 />
-              </div>
-            </Form.Group>
+              </Form.Group>
+            </div>
+            <div className="p-2 flex-fill" style={{ maxWidth: "48%" }}>
+              <Form.Group>
+                <Form.Label>Warranty Image</Form.Label>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "150px", // Adjust height as needed
+                  }}
+                >
+                  <img
+                    src={formData.pictureLink || ""}
+                    alt="Uploaded"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      // borderRadius: "100%",
+                      border: "2px solid #ccc",
+                      objectFit: "contain", // Ensures image fits nicely within the circle
+                    }}
+                  />
+                </div>
+              </Form.Group>
+            </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
@@ -145,7 +139,17 @@ const ViewUpload = ({ show, onHide, formData, handleBlur, setFormData }) => {
             variant="secondary"
             onClick={() => {
               onHide();
-              setFormData({});
+              setFormData({
+                vendor: "",
+                name: "",
+                monthlyPrice: "",
+                annualPrice: "",
+                discount: "",
+                status: "",
+                planDescription: "",
+                planName: "",
+                pictureLink: "",
+              });
             }}
           >
             Close

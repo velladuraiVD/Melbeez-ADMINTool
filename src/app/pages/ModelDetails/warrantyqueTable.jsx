@@ -18,6 +18,7 @@ import {
 import * as XLSX from "xlsx";
 import AddUpload from "./Uploadmodel";
 import ViewUpload from "./Viewwarranty";
+import PendingSubmissionModal from "./PendingModal";
 
 const WarrantyProductQueueTable = ({
   status = 0,
@@ -95,7 +96,55 @@ const WarrantyProductQueueTable = ({
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [showAddModel, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false); // Modal visibility state
+  const [showViewModal, setShowViewModal] = useState(false);
+
+  const [showPendingModal, setShowPendingModal] = useState(false);
+  const handlePending = (row) => {
+    setFormData({
+      // warrantyId: row.warrantyId,
+      status: row.status,
+      id: row.id,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // other_Details:row.other_Details,
+      // product_price_ids:row.product_price_ids,
+      // updated_by:
+      //   userDetails.result.firstName + " " + userDetails.result.lastName,
+    });
+    setShowPendingModal(true); // Assume you have a modal for confirming pending status
+  };
+
+  const handlePendingSubmission = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedData = {
+        ...formData,
+        status: "Pending", // Set the status to pending
+      };
+
+      await handleUpdateWarranty(updatedData);
+      showSuccessToast("Warranty status updated to pending successfully.");
+
+      // Fetch updated data after submission
+      fetchData();
+
+      setFormData({});
+      setShowPendingModal(false); // Close the pending modal
+    } catch (error) {
+      console.error("Error updating warranty status to pending:", error);
+      showErrorToast(
+        "Error updating warranty status to pending: " + error.message
+      );
+    }
+  };
+
+  // Modal visibility state
   const [formData, setFormData] = useState({
     id: "",
     warrantyId: "",
@@ -103,6 +152,8 @@ const WarrantyProductQueueTable = ({
     name: "",
     monthlyPrice: "",
     annualPrice: "",
+    other_Details: "",
+    product_price_ids: "",
     discount: "",
     status: "",
     planDescription: "", // Clear planDescription field
@@ -113,6 +164,7 @@ const WarrantyProductQueueTable = ({
     updated_by: "",
     file: null, // Clear the image file field
   });
+
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
   const [commonSearchTerm, setCommonSearchTerm] = useState("");
@@ -174,6 +226,8 @@ const WarrantyProductQueueTable = ({
       planDescription: row.planDescription,
       planName: row.planName,
       pictureLink: row.pictureLink,
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
       // terms_conditions: row.terms_conditions,
       // created_by: row.created_by,
       // updated_by: row.updated_by,
@@ -197,6 +251,10 @@ const WarrantyProductQueueTable = ({
       discount: row.discount,
       planDescription: row.planDescription,
       planName: row.planName,
+      status: "Pending",
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
+
       // terms_conditions: row.terms_conditions,
       // created_by: row.created_by,
       updated_by:
@@ -253,11 +311,14 @@ const WarrantyProductQueueTable = ({
 
   const handleFilter = (e) => {
     const filterValue = e.target.value;
+
     if (filterValue === "") {
+      // If no filter is selected, show all data
       setFilteredData(warrantyData);
     } else {
+      // Filter the data based on the selected status
       const filtered = warrantyData.filter(
-        (item) => item.status === filterValue
+        (item) => item.status.toLowerCase() === filterValue.toLowerCase()
       );
       setFilteredData(filtered);
     }
@@ -392,11 +453,13 @@ const WarrantyProductQueueTable = ({
             data={filteredData}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
+            handlePending={handlePending}
             handleEdit={handleEdit}
             handleDelete={handleDeleteConfirmation}
             paginate={setCurrentPage}
             searchInputRefs={searchInputRefs}
             handleSearchChange={handleSearchChange}
+            // handlePendingSubmission={handlePendingSubmission}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
           <AddUpload
@@ -407,6 +470,11 @@ const WarrantyProductQueueTable = ({
             formData={formData}
             handleSubmit={handleSubmit}
             handleInputChange={handleInputChange}
+          />
+          <PendingSubmissionModal
+            show={showPendingModal}
+            onHide={() => setShowPendingModal(false)}
+            onSubmit={handlePendingSubmission} // Call the new pending submission function
           />
           <AddEditModal
             setFormData={setFormData}

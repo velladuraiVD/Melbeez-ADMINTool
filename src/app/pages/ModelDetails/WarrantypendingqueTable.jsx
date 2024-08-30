@@ -21,6 +21,9 @@ import ViewUpload from "./Viewwarranty";
 
 import AddEditModalApproval from "./ApprovalEdit";
 import WarrantypendingapprovalTable from "./WarrantypendingapprovalTable";
+import ApproveRejectModal from "./ApprovalRejectModal";
+import ApprovalModal from "./ApprovalModal";
+import RejectionModal from "./RejectModal";
 
 const WarrantypendingqueTable = ({
   status = 0,
@@ -29,7 +32,47 @@ const WarrantypendingqueTable = ({
   isApproved = false,
 }) => {
   const [warrantyData, setWarrantyData] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  // const [selectedIds, setSelectedIds] = useState([]);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(warrantyData.map((item) => item.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectRow = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((itemId) => itemId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
   const [columns] = useState([
+    // {
+    //   dataField: "select",
+    //   text: (
+    //     <input
+    //       type="checkbox"
+    //       checked={
+    //         warrantyData.length > 0 &&
+    //         selectedIds.length === warrantyData.length
+    //       }
+    //       onChange={handleSelectAll}
+    //     />
+    //   ),
+    //   formatter: (cell, row) => (
+    //     <input
+    //       type="checkbox"
+    //       checked={selectedIds.includes(row.id)}
+    //       onChange={() => handleSelectRow(row.id)}
+    //     />
+    //   ),
+    // },
     { dataField: "warrantyId", text: "Warranty ID", headerSortingClasses },
     { dataField: "vendor", text: "Vendor", headerSortingClasses },
     { dataField: "name", text: "Name", headerSortingClasses },
@@ -95,6 +138,55 @@ const WarrantypendingqueTable = ({
   const [rowData, setRowData] = useState(null);
   const [data, setData] = useState([]);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [needsRefresh, setNeedsRefresh] = useState(false);
+
+  useEffect(() => {
+    if (needsRefresh) {
+      fetchData();
+      setNeedsRefresh(false);
+    }
+  }, [needsRefresh]);
+
+  const handleSubmit = async (e, actionType) => {
+    e.preventDefault();
+    try {
+      // If selectedIds has items, perform bulk submission
+      if (selectedIds.length > 0) {
+        await handleBulkSubmit(actionType);
+      } else {
+        // Otherwise, perform individual submission logic
+        const updatedData = {
+          ...formData,
+          status: actionType === "approve" ? "active" : "inactive",
+        };
+        await handleUpdateWarranty(updatedData);
+        const message =
+          actionType === "approve"
+            ? "Warranty approved and status updated to active successfully."
+            : "Warranty rejected and status updated to inactive successfully.";
+        showSuccessToast(message);
+        setFormData({});
+        setShowApprovalModal(false);
+        setShowRejectionModal(false);
+        setNeedsRefresh(true);
+      }
+    } catch (error) {
+      console.error(
+        `Error ${
+          actionType === "approve" ? "approving" : "rejecting"
+        } warranty:`,
+        error
+      );
+      showErrorToast(
+        `Error ${
+          actionType === "approve" ? "approving" : "rejecting"
+        } warranty: ` + error.message
+      );
+    }
+  };
+
   const [showAddModel, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false); // Modal visibility state
@@ -114,6 +206,8 @@ const WarrantypendingqueTable = ({
     // created_by: "",
     updated_by: "",
     file: null, // Clear the image file field
+    other_Details: "",
+    product_price_ids: "",
   });
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
@@ -121,7 +215,7 @@ const WarrantypendingqueTable = ({
   const {
     userDetails,
     loading,
-    handleUploadwarrenty,
+    // handleUploadwarrenty,
     handleUpdateWarranty,
   } = useAuth();
 
@@ -179,6 +273,8 @@ const WarrantypendingqueTable = ({
       // terms_conditions: row.terms_conditions,
       created_by: row.created_by,
       updated_by: row.updated_by,
+      other_Details: row.other_Details,
+      product_price_ids: row.product_price_ids,
     });
     setShowViewModal(true);
   };
@@ -187,23 +283,65 @@ const WarrantypendingqueTable = ({
     setShowViewModal(false);
     setRowData(null);
   };
-  const handleEdit = (row) => {
+  // const handleEdit = (row) => {
+  //   setFormData({
+  //     warrantyId: row.warrantyId,
+  //     status: row.status,
+  //     id: row.id,
+  //     vendor: row.vendor,
+  //     name: row.name,
+  //     monthlyPrice: row.monthlyPrice,
+  //     annualPrice: row.annualPrice,
+  //     discount: row.discount,
+  //     planDescription: row.planDescription,
+  //     planName: row.planName,
+  //     pictureLink: row.pictureLink,
+  //     updated_by:
+  //       userDetails.result.firstName + "" + userDetails.result.lastName,
+  //   });
+  //   setShowAddEditModal(true);
+  // };
+
+  const handleApproval = (row) => {
     setFormData({
-      warrantyId: row.warrantyId,
+      // warrantyId: row.warrantyId,
       status: row.status,
       id: row.id,
-      vendor: row.vendor,
-      name: row.name,
-      monthlyPrice: row.monthlyPrice,
-      annualPrice: row.annualPrice,
-      discount: row.discount,
-      planDescription: row.planDescription,
-      planName: row.planName,
-      pictureLink: row.pictureLink,
-      updated_by:
-        userDetails.result.firstName + "" + userDetails.result.lastName,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // updated_by:
+      //   userDetails.result.firstName + "" + userDetails.result.lastName,
+      // other_Details: row.other_Details,
+      // product_price_ids: row.product_price_ids,
     });
-    setShowAddEditModal(true);
+    setShowApprovalModal(true);
+  };
+
+  const handleReject = (row) => {
+    setFormData({
+      // warrantyId: row.warrantyId,
+      status: row.status,
+      id: row.id,
+      // vendor: row.vendor,
+      // name: row.name,
+      // monthlyPrice: row.monthlyPrice,
+      // annualPrice: row.annualPrice,
+      // discount: row.discount,
+      // planDescription: row.planDescription,
+      // planName: row.planName,
+      // pictureLink: row.pictureLink,
+      // updated_by:
+      //   userDetails.result.firstName + "" + userDetails.result.lastName,
+      // other_Details: row.other_Details,
+      // product_price_ids: row.product_price_ids,
+    });
+    setShowRejectionModal(true);
   };
 
   const handleDelete = async () => {
@@ -227,43 +365,6 @@ const WarrantypendingqueTable = ({
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (formData.id) {
-        await handleUpdateWarranty(formData);
-        showSuccessToast("Item updated successfully.");
-      } else {
-        await handleUploadwarrenty(formData);
-        showSuccessToast("Item added successfully.");
-      }
-      setFormData({});
-      fetchData();
-      setShowAddModal(false);
-      setShowAddEditModal(false);
-    } catch (error) {
-      console.error("Error handling warranty:", error);
-      showErrorToast("Error handling warranty.");
-    }
-  };
-
-  const handleFilter = (e) => {
-    const filterValue = e.target.value;
-    if (filterValue === "") {
-      setFilteredData(warrantyData);
-    } else {
-      const filtered = warrantyData.filter(
-        (item) => item.status === filterValue
-      );
-      setFilteredData(filtered);
-    }
-  };
-
   const exportToExcel = () => {
     try {
       // Ensure data is not empty
@@ -273,7 +374,7 @@ const WarrantypendingqueTable = ({
       }
 
       // Filter out the 'id' field from each object in data
-      const filteredData = data.map(({ id, picture,...rest }) => rest);
+      const filteredData = data.map(({ id, picture, ...rest }) => rest);
 
       const worksheet = XLSX.utils.json_to_sheet(filteredData);
       const workbook = XLSX.utils.book_new();
@@ -319,40 +420,67 @@ const WarrantypendingqueTable = ({
     setFilteredData(filtered);
   };
 
+  const handleBulkSubmit = async (actionType) => {
+    try {
+      const updatedData = warrantyData.map((item) => {
+        if (selectedIds.includes(item.id)) {
+          return {
+            ...item,
+            status: actionType === "approve" ? "active" : "inactive",
+          };
+        }
+        return item;
+      });
+
+      await Promise.all(updatedData.map((data) => handleUpdateWarranty(data)));
+
+      const message =
+        actionType === "approve"
+          ? "Selected warranties approved successfully."
+          : "Selected warranties rejected successfully.";
+      showSuccessToast(message);
+      setNeedsRefresh(true);
+      setSelectedIds([]);
+      setShowApprovalModal(false);
+      setShowRejectionModal(false);
+    } catch (error) {
+      console.error(`Error during bulk ${actionType} action:`, error);
+      showErrorToast(
+        `Error during bulk ${actionType} action: ` + error.message
+      );
+    }
+  };
+  const handleSelectionChange = (newSelectedIds) => {
+    setSelectedIds(newSelectedIds);
+  };
+
   return (
     <Container>
       <Card>
         <CardHeader title={title}>
           <CardHeaderToolbar>
-            {/* <div>
-              <select
-                name="statusSelect"
-                id="statusSelect"
-                onChange={handleFilter}
-                style={{
-                  height: "38px",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px",
-                  fontSize: "1.1em",
-                  padding: "3px 0px",
-                  marginRight: "10px",
-                  marginTop: "2px",
-                  backgroundColor: "#fff",
-                }}
-              >
-                <option value="" defaultValue>
-                  Filter by status
-                </option>
-                <option value="Pending">Pending</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div> */}
             <div className="d-flex">
+              {selectedIds.length > 0 && (
+                <>
+                  <Button
+                    className="btn btn-primary ml-2 mr-1"
+                    onClick={() => setShowApprovalModal(true)}
+                  >
+                    Approve All
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="ml-2"
+                    onClick={() => setShowRejectionModal(true)}
+                  >
+                    Reject All
+                  </Button>
+                </>
+              )}
               <div>
                 <input
                   type="search"
-                  className="form-control"
+                  className="form-control ml-2"
                   placeholder="Search..."
                   onChange={handleCommonSearchChange}
                   value={commonSearchTerm}
@@ -369,11 +497,6 @@ const WarrantypendingqueTable = ({
               </div>
             </div>
             <div className="d-flex">
-              {/* <div>
-                <Button onClick={() => setShowAddModal(true)}>
-                  Add Warranty
-                </Button>
-              </div> */}
               <div>
                 <button
                   onClick={exportToExcel}
@@ -387,35 +510,36 @@ const WarrantypendingqueTable = ({
             </div>
           </CardHeaderToolbar>
         </CardHeader>
+
         <CardBody style={{ justifyContent: "center" }}>
           <WarrantypendingapprovalTable
+            onSelectionChange={handleSelectionChange}
             columns={columns}
             data={filteredData}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            handleEdit={handleEdit}
+            handleApproval={handleApproval}
             handleDelete={handleDeleteConfirmation}
+            handleReject={handleReject}
             paginate={setCurrentPage}
             searchInputRefs={searchInputRefs}
             handleSearchChange={handleSearchChange}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
-          {/* <AddUpload
-            setFormData={setFormData}
-            show={showAddModel}
-            onHide={() => setShowAddModal(false)}
-            formData={formData}
-            handleSubmit={handleSubmit}
-            handleInputChange={handleInputChange}
-          /> */}
-          <AddEditModalApproval
-            setFormData={setFormData}
-            show={showAddEditModal}
-            onHide={() => setShowAddEditModal(false)}
-            formData={formData}
-            handleInputChange={handleInputChange}
-            handleSubmit={handleSubmit}
+
+          <ApprovalModal
+            show={showApprovalModal}
+            onHide={() => setShowApprovalModal(false)}
+            onClick={() => handleBulkSubmit("approve")}
+            onSubmit={(e) => handleSubmit(e, "approve")}
           />
+          <RejectionModal
+            show={showRejectionModal}
+            onHide={() => setShowRejectionModal(false)}
+            onClick={() => handleBulkSubmit("reject")}
+            onSubmit={(e) => handleSubmit(e, "reject")}
+          />
+
           <DeleteConfirmationModal
             show={showDeleteModal}
             onHide={() => setShowDeleteModal(false)}
@@ -424,6 +548,7 @@ const WarrantypendingqueTable = ({
           />
 
           <ViewUpload
+            setFormData={setFormData}
             show={showViewModal}
             onHide={handleCloseModal}
             formData={formData}
