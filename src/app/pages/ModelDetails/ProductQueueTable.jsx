@@ -81,6 +81,7 @@ export default function ProductQueueTable({
   const [isDraftFlag, setIsDraftFlag] = useState(false);
   const [categoryNameOnChange, setCategoryNameOnChange] = useState("");
   const [categoryIdonClick, setCategoryIdonClick] = useState("");
+  const [inputValue, setInputValue] = useState(""); // Initialize as empty string
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -279,19 +280,49 @@ export default function ProductQueueTable({
   };
   const addProductSchema = Yup.object({
     others: Yup.string()
-      .trim("can't be empty")
+      .trim("Can't be empty")
       .nullable()
       .test(
         "keyValuePairs",
         "Input must be in the format of key-value pairs e.g - Name: John;",
         (value) => {
-          if (!value) return true;
-          // const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
-          const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
-          return keyValuePattern.test(value);
+           if (!value) return true;  
+          if (!value.trim().endsWith(";")) {
+            return false; 
+          }
+          const pairs = value
+            .split(";")
+            .map((pair) => pair.trim())
+            .filter((pair) => pair.length > 0);
+        if (pairs.length > 1000) {
+            return false; 
+          }
+        for (const pair of pairs) {
+            const [key, val] = pair.split(":").map((item) => item.trim());
+            if (!key || !val) {
+              return false; 
+            }
+          }
+          return true; 
         }
       ),
   });
+  
+  // const addProductSchema = Yup.object({
+  //   others: Yup.string()
+  //     .trim("can't be empty")
+  //     .nullable()
+  //     .test(
+  //       "keyValuePairs",
+  //       "Input must be in the format of key-value pairs e.g - Name: John;",
+  //       (value) => {
+  //         if (!value) return true;
+  //         // const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
+  //         const keyValuePattern = /^(?:[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+:\s*[a-zA-Z0-9\s&(),"":;@.=\-+*$%#!_^`'~/\\|{}[\]?<>\(\)βαγδ]+;\s*)+$/gm;
+  //         return keyValuePattern.test(value);
+  //       }
+  //     ),
+  // });
 
   const initialValues = {
     modelNumber: "",
@@ -656,7 +687,7 @@ export default function ProductQueueTable({
         )}
         <CardBody style={{ justifyContent: "center" }}>
           <TablePagination
-            keyField="Id"
+            keyField="id"
             columns={columns}
             getRecordList={getProductModelPendingInfo}
             isShowExportCsv={false}
@@ -699,7 +730,7 @@ export default function ProductQueueTable({
                 placeholder="Manufacture Name"
                 name="manufacturerName"
                 onChange={handleChange}
-                value={values?.manufacturerName}
+                value={values?.manufacturerName || ""}
                 onBlur={handleBlur}
                 className="mb-3"
                 required
@@ -720,7 +751,7 @@ export default function ProductQueueTable({
                 name="modelNumber"
                 onChange={handleChange}
                 disabled={IsEditFlag || isViewData}
-                value={values?.modelNumber}
+                value={values?.modelNumber || ""}
                 onBlur={handleBlur}
                 className="mb-3"
                 required
@@ -741,7 +772,7 @@ export default function ProductQueueTable({
                 name="productName"
                 onChange={handleChange}
                 disabled={isViewData}
-                value={values?.productName}
+                value={values?.productName || ""}
                 onBlur={handleBlur}
                 className="mb-3"
                 required
@@ -755,19 +786,19 @@ export default function ProductQueueTable({
               onChange={handleCategoryChange}
               name="categoryName"
               disabled={isViewData}
-              value={values?.categoryName}
+              value={values?.categoryName || ""} // Use an empty string instead of null
               style={{ width: "100%", height: "33px" }}
               required
             >
-              <option>Select Category</option>
-              {categoryName?.map((category, index) => (
-                <>
-                  <option key={index} value={category?.categoryId}>
-                    {category?.categoryName}
-                  </option>
-                </>
+              <option value="">Select Category</option>{" "}
+              {/* Ensure this option has an empty value */}
+              {categoryName?.map((category) => (
+                <option key={category?.categoryId} value={category?.categoryId}>
+                  {category?.categoryName}
+                </option>
               ))}
             </select>
+
             <Form.Label>Others</Form.Label>
             <br />
             <Form.Control

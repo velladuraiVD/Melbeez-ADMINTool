@@ -101,7 +101,7 @@ const Maintenance = () => {
         <div style={{ width: "60px" }}>
           <BootstrapSwitchButton
             checked={getchecked}
-            onChange={getchecked == false ? handleShow : handleShow2}
+            onChange={getchecked === false ? handleShow : handleShow2}
             onstyle="outline-warning"
             offstyle="outline-primary"
           />

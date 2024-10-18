@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button, Container } from "react-bootstrap";
+import { Button, Container, Spinner } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 import { useAuth } from "./AuthContext";
 import "../ModelDetails/Warranty.css";
@@ -141,7 +141,7 @@ const WarrantypendingqueTable = ({
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(false);
-
+const [loading,setLoading]=useState(false)
   useEffect(() => {
     if (needsRefresh) {
       fetchData();
@@ -214,7 +214,7 @@ const WarrantypendingqueTable = ({
   const [commonSearchTerm, setCommonSearchTerm] = useState("");
   const {
     userDetails,
-    loading,
+  
     // handleUploadwarrenty,
     handleUpdateWarranty,
   } = useAuth();
@@ -235,6 +235,8 @@ const WarrantypendingqueTable = ({
   }, [userDetails, loading, formData.author]);
 
   const fetchData = async () => {
+
+    setLoading(true)
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/pending`
@@ -249,6 +251,12 @@ const WarrantypendingqueTable = ({
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    finally{
+
+    
+      setLoading(false); // Set loading to false when data fetch is complete
+
+  }
   };
 
   const handleDeleteConfirmation = (row) => {
@@ -512,6 +520,14 @@ const WarrantypendingqueTable = ({
         </CardHeader>
 
         <CardBody style={{ justifyContent: "center" }}>
+         
+        {loading ? ( // Display a loading spinner while data is being fetched
+            <div className="text-center">
+              <Spinner animation="border" role="status">
+                <span className="sr-only">Loading...</span>
+              </Spinner>
+            </div>
+          ) : (
           <WarrantypendingapprovalTable
             onSelectionChange={handleSelectionChange}
             columns={columns}
@@ -527,6 +543,7 @@ const WarrantypendingqueTable = ({
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
 
+          )}
           <ApprovalModal
             show={showApprovalModal}
             onHide={() => setShowApprovalModal(false)}

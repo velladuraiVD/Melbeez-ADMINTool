@@ -140,7 +140,7 @@ export default function BasePage() {
           <Route path="/feed" component={Feed} />
           <Route path="/warranty" component={Warranty} />
           {/* <Route path="/payment" component={PaymentTable} /> */}
-          <Route path="/warrantyapproval" component={WarrantyApproval} />
+          <Route path="/approval" component={WarrantyApproval} />
           <Route path="/product-queue" component={ProductQueueTable} />
           <Route
             path="/approval-pending-table"
