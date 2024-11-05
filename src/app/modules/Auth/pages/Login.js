@@ -1,98 +1,72 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { connect, useDispatch } from "react-redux";
 import { FormattedMessage, injectIntl } from "react-intl";
 import * as auth from "../_redux/authRedux";
 import logoImg from "./logos/loginLogo.png";
 import { setProfile } from "../../../../redux/slice/myProfile";
-
 function Login(props) {
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState();
-  const [password, setpassword] = useState();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordShown, setPasswordShown] = useState(false);
-  const [showeye, setShoweye] = useState();
-
   const togglePassword = () => {
     setPasswordShown(!passwordShown);
   };
-
-  const eyeToggle = () => {
-    if (passwordShown == false) {
-      setShoweye(
-        <>
-          &nbsp;
-          <div style={{ marginTop: "18px", marginRight: "15px" }}>
-            <span onClick={togglePassword}>
-              <i className="fa fa-eye-slash" aria-hidden="true"></i>
-            </span>
-          </div>
-        </>
-      );
-    } else {
-      setShoweye(
-        <>
-          &nbsp;
-          <div style={{ marginTop: "18px", marginRight: "15px" }}>
-            <span onClick={togglePassword}>
-              <i className="fa fa-eye" aria-hidden="true"></i>
-            </span>
-          </div>
-        </>
-      );
-    }
-  };
-  useEffect(() => {
-    eyeToggle();
-  },[passwordShown]);
   
-
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false; // Cleanup function to set to false when unmounted
+    };
+  }, []);
   const dispatch = useDispatch();
-
   const handleUser = (e) => {
     setUsername(e.target.value);
   };
   const handlePassword = (e) => {
-    setpassword(e.target.value);
+    setPassword(e.target.value);
   };
-
-  const handleAPI = (e) => {
-    setLoading(true)
+  const handleAPI = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    const controller = new AbortController(); // Create an AbortController
+    const { signal } = controller; // Get the signal from the controller
     var obj = {
       username: username,
       password: password,
     };
     var myHeaders = {
-      'Content-Type' :  'application/json',
-      "melbeez-platform" : "AdminPortal",
-      }
-      const reqOption = {
-        method: "POST",
-          headers: myHeaders, 
-          body: JSON.stringify(obj),
-      }
-
-    fetch(`${process.env.REACT_APP_API_URL}/api/user/authenticate`, reqOption)
-      .then((res) => {
-        return res.json();
-      })
-      .then((result) => {
+      "Content-Type": "application/json",
+      "melbeez-platform": "AdminPortal",
+    };
+    const reqOption = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(obj),
+      signal, // Pass the signal to the fetch request
+    };
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/user/authenticate`,
+        reqOption
+      );
+      const result = await res.json();
+      if (isMounted.current) {
         if (
-          result.result.phoneNumberConfirmed === true ||
-          result.result.emailConfirmed === true
+          result.result.phoneNumberConfirmed ||
+          result.result.emailConfirmed
         ) {
           props.login(result.result.token);
           props.fulfillUser(result.result);
           props.setUser(result.result);
-          setLoading(false)
           localStorage.setItem("userDetail", JSON.stringify(result.result));
           localStorage.setItem("authToken", result.result.token);
           localStorage.setItem("refToken", result.result.refreshToken);
           localStorage.setItem("Role", result.result.role);
         } else {
-          localStorage.clear();
           localStorage.clear();
           setErrorMessage("Please Confirm Your Phone or Email to Login");
         }
@@ -104,13 +78,24 @@ function Login(props) {
           email: result.result.email,
         };
         dispatch(setProfile(myprof));
-      })
-      .catch((error) => {
-        setLoading(false)
-        setErrorMessage("Invalid Username or Password");
-      });
+      }
+    } catch (error) {
+      if (isMounted.current) {
+        if (error.name === "AbortError") {
+          console.log("Fetch aborted");
+        } else {
+          setErrorMessage("Invalid Username or Password");
+        }
+      }
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }
+    return () => {
+      controller.abort(); // Cancel the fetch request on unmount
+    };
   };
-
   return (
     <div className="login-form login-signin" id="kt_login_signin_form">
       <div className="text-center mb-10 mb-lg-20">
@@ -118,53 +103,55 @@ function Login(props) {
           <FormattedMessage id="AUTH.LOGIN.TITLE" />
         </h3>
       </div>
-
       <img
         className="d-block mx-auto img-fluid w-50 mb-20"
         src={logoImg}
-        alt=""
+        alt="logo"
       />
-
       <form
-        onSubmit={(e) => handleAPI(e)}
+        onSubmit={handleAPI}
         className="form fv-plugins-bootstrap fv-plugins-framework"
       >
         {errorMessage && (
-          <div className="text-danger text-center mb-5"> {errorMessage} </div>
+          <div className="text-danger text-center mb-5">{errorMessage}</div>
         )}
-
         <div className="form-group fv-plugins-icon-container">
           <input
             placeholder="Email/User Name"
             type="text"
-            className={`form-control form-control-solid h-auto py-5 px-6 `}
+            className={`form-control form-control-solid h-auto py-5 px-6`}
             name="username"
-            style={{ background: "#e5e5e5" }}
+            style={{ background: "#E5E5E5" }}
             value={username}
             onChange={handleUser}
             required
           />
         </div>
-
         <div
           className="form-group fv-plugins-icon-container"
-          style={{ display: "flex", background: "#e5e5e5" }}
+          style={{ display: "flex", background: "#E5E5E5" }}
         >
           <div style={{ width: "600px" }}>
             <input
               placeholder="Password"
               type={passwordShown ? "text" : "password"}
-              className={`form-control form-control-solid h-auto py-5 px-6 `}
+              className={`form-control form-control-solid h-auto py-5 px-6`}
               name="password"
-              style={{ background: "#e5e5e5", border: "0" }}
+              style={{ background: "#E5E5E5", border: "0" }}
               value={password}
               onChange={handlePassword}
               required
             />
           </div>
-          {showeye}
+          <div style={{ marginTop: "18px", marginRight: "15px" }}>
+            <span onClick={togglePassword}>
+              <i
+                className={`fa ${passwordShown ? "fa-eye" : "fa-eye-slash"}`}
+                aria-hidden="true"
+              ></i>
+            </span>
+          </div>
         </div>
-
         <div className="form-group d-flex flex-wrap justify-content-between align-items-center">
           <Link
             to="/auth/forgot-password"
@@ -186,5 +173,4 @@ function Login(props) {
     </div>
   );
 }
-
 export default injectIntl(connect(null, auth.actions)(Login));

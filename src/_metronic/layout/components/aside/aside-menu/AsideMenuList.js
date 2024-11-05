@@ -162,57 +162,51 @@ export function AsideMenuList({ layoutProps }) {
           <NavLink className="menu-link menu-toggle" to="/UserManange">
             <span className="svg-icon menu-icon">
               <SVG
-                src={toAbsoluteUrl("/media/svg/icons/General/warrenty3.svg")}
+                src={toAbsoluteUrl("/media/svg/icons/General/Shield-check.svg")}
               />
             </span>
             <span className="menu-text">Warranty Product info</span>
             <i className="menu-arrow" />
           </NavLink>
-          {isSuperAdmin && (
-            <>
-              <div className="menu-submenu">
-                <i className="menu-arrow" />
-                <ul className="menu-subnav">
-                  <li
-                    className={`menu-item ${getMenuItemActive("/warranty")}`}
-                    aria-haspopup="true"
-                  >
-                    <NavLink className="menu-link" to="/warranty">
-                      <i className="menu-bullet menu-bullet-dot">
-                        <span />
-                      </i>
-                      <span className="menu-text">All Warranties</span>
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-            </>
-          )}
 
           {isSuperAdmin && (
-            <>
-              <div className="menu-submenu">
-                <i className="menu-arrow" />
-                <ul className="menu-subnav">
-                  <li
-                    className={`menu-item ${getMenuItemActive(
-                      "/warrantyapproval"
-                    )}`}
-                    aria-haspopup="true"
-                  >
-                    <NavLink className="menu-link" to="/warrantyapproval">
-                      <i className="menu-bullet menu-bullet-dot">
-                        <span />
-                      </i>
-                      <span className="menu-text">warranty approval</span>
-                    </NavLink>
-                  </li>
-                </ul>
-              </div>
-            </>
+            <div className="menu-submenu">
+              <i className="menu-arrow" />
+              <ul className="menu-subnav">
+                <li
+                  className={`menu-item ${getMenuItemActive("/warranty")}`}
+                  aria-haspopup="true"
+                >
+                  <NavLink className="menu-link" to="/warranty">
+                    <i className="menu-bullet menu-bullet-dot">
+                      <span />
+                    </i>
+                    <span className="menu-text">All Warranties</span>
+                  </NavLink>
+                </li>
+              </ul>
+            </div>
+          )}
+          {isSuperAdmin && (
+            <div className="menu-submenu">
+              <i className="menu-arrow" />
+              <ul className="menu-subnav">
+                <li
+                  className={`menu-item ${getMenuItemActive("/approval")}`}
+                  aria-haspopup="true"
+                >
+                  <NavLink className="menu-link" to="/approval">
+                    <i className="menu-bullet menu-bullet-dot">
+                      <span />
+                    </i>
+                    <span className="menu-text">warranty approval</span>
+                  </NavLink>
+                </li>
+              </ul>
+            </div>
           )}
         </li>
-        
+
         <li
           className={`menu-item menu-item-submenu ${getMenuItemActive(
             "/UserManange",
@@ -469,7 +463,6 @@ export function AsideMenuList({ layoutProps }) {
             <span className="menu-text">System Maintenance</span>
           </NavLink>
         </li>
-        
 
         <li
           className={`menu-item ${getMenuItemActive("/feed")}`}

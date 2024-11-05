@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button, Container } from "react-bootstrap";
+import { Button, Container, Spinner } from "react-bootstrap";
 import { showErrorToast, showSuccessToast } from "../../../Utility/toastMsg";
 import { useAuth } from "./AuthContext";
 import "../ModelDetails/Warranty.css";
@@ -27,6 +27,7 @@ const WarrantyProductQueueTable = ({
   isApproved = false,
 }) => {
   const [warrantyData, setWarrantyData] = useState([]);
+  const [loading, setLoading] = useState(true); 
   const [fileError, setFileError] = useState("");
   const [columns] = useState([
     { dataField: "warrantyId", text: "Warranty ID", headerSortingClasses },
@@ -170,7 +171,7 @@ const WarrantyProductQueueTable = ({
   const [commonSearchTerm, setCommonSearchTerm] = useState("");
   const {
     userDetails,
-    loading,
+  
     handleUploadwarrenty,
     handleUpdateWarranty,
   } = useAuth();
@@ -191,6 +192,7 @@ const WarrantyProductQueueTable = ({
   }, [userDetails, loading, formData.author]);
 
   const fetchData = async () => {
+    setLoading(true); // Set loading to true when data fetch starts
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/all`
@@ -204,6 +206,11 @@ const WarrantyProductQueueTable = ({
       setData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
+    }finally{
+
+    
+        setLoading(false); // Set loading to false when data fetch is complete
+ 
     }
   };
 
@@ -448,6 +455,14 @@ const WarrantyProductQueueTable = ({
           </CardHeaderToolbar>
         </CardHeader>
         <CardBody style={{ justifyContent: "center" }}>
+          
+        {loading ? ( // Display a loading spinner while data is being fetched
+            <div className="text-center">
+              <Spinner animation="border" role="status">
+                <span className="sr-only">Loading...</span>
+              </Spinner>
+            </div>
+          ) : (
           <WarrantyTable
             columns={columns}
             data={filteredData}
@@ -462,6 +477,7 @@ const WarrantyProductQueueTable = ({
             // handlePendingSubmission={handlePendingSubmission}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />
+        )}
           <AddUpload
             // handleFileChange={handleFileChange}
             setFormData={setFormData}

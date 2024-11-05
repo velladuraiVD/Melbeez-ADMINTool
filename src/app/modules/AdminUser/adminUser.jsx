@@ -354,7 +354,7 @@ export default function AdminUser() {
                 />
               </div>
               <div>
-                <button
+                <button 
                   type="button"
                   className="btn btn-primary mr-1 ml-2"
                   onClick={(e) => {

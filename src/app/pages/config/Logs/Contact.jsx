@@ -9,7 +9,7 @@ import { headerSortingClasses } from "../../../../_metronic/_helpers";
 import { GetContactUS } from "../../../services/configService";
 import TablePagination from "../../../Components/TablePagination";
 import { useState, useRef } from "react";
-import { Button, Modal } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import moment from "moment";
 import { addBlockUserData } from "../../../../redux/Block_user/action";
 import { useDispatch } from "react-redux";
@@ -24,7 +24,7 @@ export default function ContactUs() {
   };
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  // const handleShow = () => setShow(true);
 
   const [imageShow, setImageShow] = useState(false);
   const dispatch = useDispatch();
