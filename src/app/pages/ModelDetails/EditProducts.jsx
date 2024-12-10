@@ -165,7 +165,7 @@ export default function EditProducts({handleClose, show, productsData, productCa
                 setCategoryInputs(JSON.parse(result?.result[0]?.formBuilderData));
             })
             .catch((error) => {
-                console.error("Error:", error);
+                // console.error("Error:", error);
             });
     };
 
