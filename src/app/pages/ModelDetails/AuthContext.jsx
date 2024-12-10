@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   const fetchFeeds = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/all/feeds`
+        `${process.env.REACT_APP_JAVA_API_URL}/all/feeds`, {mode: 'cors'}
       );
       if (!response.ok) {
         throw new Error("Failed to fetch feeds");
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       setPostData(data);
     } catch (error) {
       showErrorToast("No feed found");
-      console.log(error)
+      // console.log(error)
     }
   };
   const handleUpload = async (formData, setMessage, setFormData, setShow) => {
@@ -181,9 +181,9 @@ export const AuthProvider = ({ children }) => {
     //   return;
     // }
     const firstName = localStorage.getItem("firstName")
-    console.log("firstName:", firstName);
+    // console.log("firstName:", firstName);
     const lastName = localStorage.getItem("lastName")
-    console.log("lastName:", lastName);
+    // console.log("lastName:", lastName);
     if (!firstName && !lastName) {
       showErrorToast("User details not found.");
       return;
@@ -305,7 +305,7 @@ export const AuthProvider = ({ children }) => {
 
     } catch (error) {
       showErrorToast("No comment found");
-      console.log(error)
+      // console.log(error)
     }
   };
 
@@ -313,7 +313,7 @@ export const AuthProvider = ({ children }) => {
   const createComment = async (postId, commentText) => {
     try {
       const userId = localStorage.getItem("userId")
-      console.log("User ID:", userId);
+      // console.log("User ID:", userId);
       // Construct the request
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/${postId}/${userId}/Melbeez/comment`,
@@ -333,10 +333,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log("Comment uploaded successfully:", data);
+      // console.log("Comment uploaded successfully:", data);
       showSuccessToast("Comment added successfully");
     } catch (error) {
-      console.error("Error uploading comment:", error);
+      // console.error("Error uploading comment:", error);
       showErrorToast("Failed to add comment");
     }
   };
@@ -357,7 +357,7 @@ export const AuthProvider = ({ children }) => {
       await fetchComments(feedId);
       // await fetchSingleFeed(feedId)
       showSuccessToast("comment deleted successfully");
-      console.log(feedId,commentId)
+      // console.log(feedId,commentId)
       // console.log("comment deleted succesfully")
     } catch (error) {
       showErrorToast("Error deleting comment: " + error.message);
@@ -380,13 +380,13 @@ export const AuthProvider = ({ children }) => {
 
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to add Like");
       }
 
     } catch (error) {
-      console.error("Error uploading Like:", error);
+      // console.error("Error uploading Like:", error);
       showErrorToast("Failed to add Like");
     }
   };
@@ -404,7 +404,7 @@ export const AuthProvider = ({ children }) => {
       
     } catch (error) {
       showErrorToast("No feed found");
-      console.log(error)
+      // console.log(error)
     }
   };
  
@@ -421,6 +421,7 @@ export const AuthProvider = ({ children }) => {
         handleUpload,
         createComment,
         postData,
+        setPostData,
         fetchFeeds,
         handleDeletePost,
         handleUploadwarrenty,
@@ -431,6 +432,7 @@ export const AuthProvider = ({ children }) => {
         handleDeleteComment,
         fetchLikesdetails,
         likedetails,
+        setLikeDetails,
         fetchSingleFeed
       }}
     >

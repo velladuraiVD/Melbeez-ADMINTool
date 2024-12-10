@@ -11,7 +11,7 @@ const DeleteModel = ({ show, onHide, onDelete }) => {
         await onDelete();
         onHide();
       } catch (error) {
-        console.error("Error deleting item:", error);
+        // console.error("Error deleting item:", error);
       } finally {
         setLoading(false);
       }

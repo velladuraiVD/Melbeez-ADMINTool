@@ -86,9 +86,9 @@ export default function ProductFeed({
     const value = e.target.value;
     if (value.length > 200) {
       setDescriptionError("Description cannot exceed 200 characters.");
-      console.log(descriptionError);
+      // console.log(descriptionError);
     } else {
-      console.log("is work");
+      // console.log("is work");
       setDescriptionError("");
       setFormData({
         ...formData,
@@ -115,7 +115,7 @@ export default function ProductFeed({
         await handleUpload(formData, setMessage, setFormData);
         handleClose();
       } catch (error) {
-        console.error("Error during upload:", error);
+        // console.error("Error during upload:", error);
       }
       setLoading(false);
     }
@@ -141,8 +141,8 @@ export default function ProductFeed({
             </CardHeaderToolbar>
           </CardHeader>
         )}
-        <CardBody style={{ justifyContent: "center" }}>
-          <FeedCard />
+        <CardBody style={{ justifyContent: "center"}}>
+          <FeedCard/>
         </CardBody>
       </Card>
       {/* -----  Upload  Modal ---- */}
@@ -165,9 +165,10 @@ export default function ProductFeed({
                 marginRight: "8px",
               }}
             >
-              <Form.Label>Author</Form.Label>
+              <Form.Label htmlFor="author">Author</Form.Label>
               <Form.Control
                 type="text"
+                id="author" 
                 name="author"
                 value={formData.author}
                 onChange={(e) => {
@@ -183,9 +184,10 @@ export default function ProductFeed({
                 marginRight: "8px",
               }}
             >
-              <Form.Label>Description</Form.Label>
+              <Form.Label htmlFor="description">Description</Form.Label>
               <Form.Control
                 type="text"
+                id="description"
                 name="description"
                 value={formData.description}
                 onChange={(e) => {
@@ -206,14 +208,14 @@ export default function ProductFeed({
                 marginRight: "8px",
               }}
             >
-              <Form.Label>Image or Video</Form.Label>
+              <Form.Label htmlFor="file">Image or Video</Form.Label>
               <div className="border border-gray-100 border-2 p-2 w-60">
-                <input type="file" id="file" onChange={handleFileChange} />
+                <input type="file" name="file" id="file" onChange={handleFileChange} />
                 {fileError && (
                   <div className="text-danger mt-2">{fileError}</div>
                 )}
               </div>
-              <Form.Label>Selected File</Form.Label>
+              <Form.Label htmlFor="file">Selected File</Form.Label>
               <div
                 className="border border-gray-100 border-2 p-2 w-60"
                 style={{

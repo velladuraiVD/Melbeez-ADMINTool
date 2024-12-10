@@ -51,7 +51,7 @@ const AddUpload = ({
         setFormData(initialFormData); // Clear form data with default values
         // showSuccessToast("Upload successful.");
       } catch (error) {
-        console.error("Error handling upload:", error);
+        // console.error("Error handling upload:", error);
         showErrorToast("Error handling upload.");
       }
       setLoading(false);

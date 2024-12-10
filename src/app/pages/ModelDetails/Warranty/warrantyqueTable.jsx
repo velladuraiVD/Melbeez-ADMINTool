@@ -138,7 +138,7 @@ const WarrantyProductQueueTable = ({
       setFormData({});
       setShowPendingModal(false); // Close the pending modal
     } catch (error) {
-      console.error("Error updating warranty status to pending:", error);
+      // console.error("Error updating warranty status to pending:", error);
       showErrorToast(
         "Error updating warranty status to pending: " + error.message
       );
@@ -205,7 +205,7 @@ const WarrantyProductQueueTable = ({
       setFilteredData(data);
       setData(data);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // console.error("Error fetching data:", error);
     }finally{
 
     
@@ -284,7 +284,7 @@ const WarrantyProductQueueTable = ({
       setData(updatedData);
       setFilteredData(updatedData);
     } catch (error) {
-      console.error("Error deleting item:", error);
+      // console.error("Error deleting item:", error);
       showErrorToast("Error deleting item.");
     } finally {
       setShowDeleteModal(false);
@@ -311,7 +311,7 @@ const WarrantyProductQueueTable = ({
       setShowAddModal(false);
       setShowAddEditModal(false);
     } catch (error) {
-      console.error("Error handling warranty:", error);
+      // console.error("Error handling warranty:", error);
       showErrorToast("Error handling warranty.");
     }
   };
@@ -349,7 +349,7 @@ const WarrantyProductQueueTable = ({
       showSuccessToast("Data exported to Excel successfully.");
     } catch (error) {
       showErrorToast("Error exporting data to Excel.");
-      console.error("Export to Excel error:", error);
+      // console.error("Export to Excel error:", error);
     }
   };
 

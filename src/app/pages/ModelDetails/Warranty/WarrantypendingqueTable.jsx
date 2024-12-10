@@ -173,12 +173,12 @@ const [loading,setLoading]=useState(false)
         setNeedsRefresh(true);
       }
     } catch (error) {
-      console.error(
-        `Error ${
-          actionType === "approve" ? "approving" : "rejecting"
-        } warranty:`,
-        error
-      );
+      // console.error(
+      //   `Error ${
+      //     actionType === "approve" ? "approving" : "rejecting"
+      //   } warranty:`,
+      //   error
+      // );
       showErrorToast(
         `Error ${
           actionType === "approve" ? "approving" : "rejecting"
@@ -249,7 +249,7 @@ const [loading,setLoading]=useState(false)
       setFilteredData(data);
       setData(data);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // console.error("Error fetching data:", error);
     }
     finally{
 
@@ -366,7 +366,7 @@ const [loading,setLoading]=useState(false)
       setData(updatedData);
       setFilteredData(updatedData);
     } catch (error) {
-      console.error("Error deleting item:", error);
+      // console.error("Error deleting item:", error);
       showErrorToast("Error deleting item.");
     } finally {
       setShowDeleteModal(false);
@@ -391,7 +391,7 @@ const [loading,setLoading]=useState(false)
       showSuccessToast("Data exported to Excel successfully.");
     } catch (error) {
       showErrorToast("Error exporting data to Excel.");
-      console.error("Export to Excel error:", error);
+      // console.error("Export to Excel error:", error);
     }
   };
 
@@ -452,7 +452,7 @@ const [loading,setLoading]=useState(false)
       setShowApprovalModal(false);
       setShowRejectionModal(false);
     } catch (error) {
-      console.error(`Error during bulk ${actionType} action:`, error);
+      // console.error(`Error during bulk ${actionType} action:`, error);
       showErrorToast(
         `Error during bulk ${actionType} action: ` + error.message
       );
