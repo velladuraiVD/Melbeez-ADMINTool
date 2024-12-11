@@ -423,7 +423,9 @@ export default function ProductQueueTable({
           showErrorToast(res.message);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => 
+        console.log(error)
+    );
   };
 
   const showDeleteModal = (e, id) => {

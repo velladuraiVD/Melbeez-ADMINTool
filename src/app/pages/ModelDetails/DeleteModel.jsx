@@ -10,7 +10,7 @@ const DeleteConfirmationModal = ({ show, onHide, onDelete, product }) => {
       await onDelete();
       onHide(); // Close modal after successful deletion
     } catch (error) {
-      console.error('Error deleting item:', error);
+      // console.error('Error deleting item:', error);
       // Handle error scenario (e.g., show error message)
     } finally {
       setLoading(false);

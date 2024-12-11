@@ -26,9 +26,9 @@ import AllData from "./pages/ModelDetails/AllData";
 import ApprovalPendingTable from "./pages/ModelDetails/ApprovalPendingTable";
 import ProductQueueTable from "./pages/ModelDetails/ProductQueueTable";
 import BulkUpload from "./pages/ModelDetails/BulkUpload";
-import Feed from "./pages/ModelDetails/Feed";
-import Warranty from"./pages/ModelDetails/Warranty";
-import WarrantyApproval from "./pages/ModelDetails/Warrantypendingapproval";
+import Feed from "./pages/ModelDetails/AdminFeed/Feed";
+import Warranty from"./pages/ModelDetails/Warranty/Warranty";
+import WarrantyApproval from "./pages/ModelDetails/Warranty/Warrantypendingapproval";
 import PaymentTable from "./pages/ModelDetails/PaymentTable";
 
 const UserProfilepage = lazy(() =>
