@@ -475,17 +475,17 @@ export function AsideMenuList({ layoutProps }) {
             <span className="menu-text">Admin feed</span>
           </NavLink>
         </li>
-        {/* <li
-          className={`menu-item ${getMenuItemActive("/payment")}`}
+        <li
+          className={`menu-item ${getMenuItemActive("/transaction-detail")}`}
           aria-haspopup="true"
         >
-          <NavLink className="menu-link menu-toggle" to="/payment">
+          <NavLink className="menu-link menu-toggle" to="/transaction-detail">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/General/payment.svg")} />
             </span>
             <span className="menu-text">Payment details</span>
           </NavLink>
-        </li> */}
+        </li>
       </ul>
     </>
   );

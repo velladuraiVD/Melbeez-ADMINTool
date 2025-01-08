@@ -10,15 +10,19 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [userDetails, setUserDetails] = useState(null);
-  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [postData, setPostData] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [postcomments, setPostcomments] = useState([]);
   const [likedetails, setLikeDetails] = useState([]);
+  const[filterdata, setfilterdata]= useState([])
+
+const[transactiondata,setTransactiondata]=useState([])
   
   useEffect(() => {
     const fetchUserDetails = async () => {
+setLoading(true)
       try {
         const response = await authUserDetail();
         if (!response.ok) {
@@ -34,9 +38,9 @@ export const AuthProvider = ({ children }) => {
         setUserDetails(data);
       } catch (error) {
         setError(error.message);
-      } //finally {
-      //   setLoading(false);
-      // }
+      } finally {
+        setLoading(false);
+     }
     };
     fetchUserDetails();
   }, []);
@@ -408,7 +412,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
  
-
+  const fetchTransactionDetails= async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_JAVA_API_URL}/transactions/all`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch Transaction Details");
+      }
+      const data = await response.json();
+      setTransactiondata(data);
+      setfilterdata(data)
+      console.log(data)
+      
+    } catch (error) {
+      showErrorToast("No Transaction Details found");
+      console.log(error)
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -418,6 +439,7 @@ export const AuthProvider = ({ children }) => {
         setPostcomments,
         postcomments,
         error,
+        loading,
         handleUpload,
         createComment,
         postData,
@@ -433,7 +455,13 @@ export const AuthProvider = ({ children }) => {
         fetchLikesdetails,
         likedetails,
         setLikeDetails,
-        fetchSingleFeed
+        fetchSingleFeed,
+        fetchTransactionDetails,
+        transactiondata,
+        setTransactiondata,
+        setfilterdata,
+        filterdata
+        
       }}
     >
       {children}
