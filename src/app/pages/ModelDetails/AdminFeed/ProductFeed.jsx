@@ -15,6 +15,7 @@ export default function ProductFeed({
   screen = "",
   isApproved = false,
 }) {
+ 
   const [message, setMessage] = useState("");
   const [show, setShow] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ export default function ProductFeed({
   const [fileError, setFileError] = useState("");
   const [loading, setLoading] = useState(false);
   const { userDetails,handleUpload } = useAuth();
-
+ 
   useEffect(() => {
     if ( userDetails && !formData.author) {
       const fullName = `${userDetails.result.firstName} ${userDetails.result.lastName}`;
@@ -86,7 +87,7 @@ export default function ProductFeed({
     const value = e.target.value;
     if (value.length > 200) {
       setDescriptionError("Description cannot exceed 200 characters.");
-      // console.log(descriptionError);
+      
     } else {
       // console.log("is work");
       setDescriptionError("");
@@ -114,6 +115,7 @@ export default function ProductFeed({
       try {
         await handleUpload(formData, setMessage, setFormData);
         handleClose();
+        
       } catch (error) {
         // console.error("Error during upload:", error);
       }

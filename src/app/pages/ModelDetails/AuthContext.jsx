@@ -16,66 +16,75 @@ export const AuthProvider = ({ children }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [postcomments, setPostcomments] = useState([]);
   const [likedetails, setLikeDetails] = useState([]);
-  const[filterdata, setfilterdata]= useState([])
+  const [filterdata, setfilterdata] = useState([]);
 
-const[transactiondata,setTransactiondata]=useState([])
-  
+
+  const token = localStorage.getItem("authToken");
+
+
+  // Helper function to add authorization headers
+  const getAuthorizedHeaders = () => ({
+    authorization: `Bearer ${token}`,
+  });
+  const userId = localStorage.getItem("userId");
+  const userName = localStorage.getItem("userName");
+  const [transactiondata, setTransactiondata] = useState([]);
+
   useEffect(() => {
     const fetchUserDetails = async () => {
-setLoading(true)
-      try {
+      setLoading(true);
+      try { 
         const response = await authUserDetail();
         if (!response.ok) {
           throw new Error("Failed to fetch user details");
         }
         const data = await response.json();
-        // console.log(data)
-        localStorage.setItem("userName", data.result.username)
-        localStorage.setItem("userId", data.result.id)
-        localStorage.setItem("firstName", data.result.firstName)
-        localStorage.setItem("lastName", data.result.lastName)
-    
+        localStorage.setItem("userName", data.result.username);
+        localStorage.setItem("userId", data.result.id);
+        localStorage.setItem("firstName", data.result.firstName);
+        localStorage.setItem("lastName", data.result.lastName);
+
         setUserDetails(data);
       } catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
-     }
+      }
     };
     fetchUserDetails();
   }, []);
-  const fetchFeeds = async () => {
+  const fetchFeeds = async (page = 0, size=3) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/all/feeds`, {mode: 'cors'}
+        `${process.env.REACT_APP_JAVA_API_URL}/feed/all?page=${page}&size=${size}`,
+        {
+          mode: "cors",
+          headers: {
+            ...getAuthorizedHeaders(),
+          },
+        }
       );
+  
       if (!response.ok) {
         throw new Error("Failed to fetch feeds");
       }
       const data = await response.json();
-      setPostData(data);
-    
+  
+      // Sort the fetched data by createdAt field in descending order
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  
+     
+      return data;
+  
     } catch (error) {
-      showErrorToast("No feed found");
-      // console.log(error)
+      
+      
+      return [];
     }
   };
-  const fetchSingleFeed = async (feedId) => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/${feedId}/feed`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch feed");
-      }
-      const data = await response.json();
-      setPostData(data);
-    } catch (error) {
-      showErrorToast("No feed found");
-      // console.log(error)
-    }
-  };
-  const handleUpload = async (formData, setMessage, setFormData, setShow) => {
+  
+  
+  const handleUpload = async (formData, setMessage, setFormData, setShow, page = 0, size = 3) => {
     if (!formData.author) {
       setMessage("Author is required.");
       showWarnToast("Please fill in all required fields.");
@@ -83,10 +92,11 @@ setLoading(true)
     }
     if (!formData.file && !formData.description) {
       setMessage("Please provide either an image or a description.");
-      showWarnToast("Please provide image and description.");
+      showWarnToast("Please provide an image and description.");
       setShow(true);
       return;
     }
+  
     const form = new FormData();
     form.append("author", formData.author);
     if (formData.file) {
@@ -98,14 +108,21 @@ setLoading(true)
     if (userDetails) {
       form.append("userId", userDetails.result.id);
     }
+  
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/upload`,
+        `${process.env.REACT_APP_JAVA_API_URL}/feed/upload`,
         {
+          mode: "cors",
           method: "POST",
+          headers: {
+            ...getAuthorizedHeaders(),
+            // Do not include 'Content-Type', as the browser handles it for FormData
+          },
           body: form,
         }
       );
+  
       if (!response.ok) {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Unknown error occurred.";
@@ -114,35 +131,40 @@ setLoading(true)
         showErrorToast(errorMessage);
         return;
       }
-      // setShow(false)
+  
       showSuccessToast("Upload feed successful");
       setFormData({
         author: "",
         description: "",
         file: null,
       });
-      // // Don't close the modal if only a description is provided
-      // if (formData.description && !formData.file) {
-      //   setShow(true);
-      //   showWarnToast("Please provide image and description.");
-      // }else{
-      // }
-      // Fetch feeds after successful upload
-      fetchFeeds();
+  
+      // Fetch updated feeds with pagination after upload
+      const updatedFeeds = await fetchFeeds(page, size);
+      if (updatedFeeds) {
+        setPostData(updatedFeeds);
+        fetchLikesdetails();  // Update likes after feed upload
+      }
+      // Optionally, call any other functions to refresh data
+  
     } catch (error) {
       const errorMessage = "Error uploading file";
-      showWarnToast("Please provide image and description.");
       setMessage(errorMessage);
-      // console.error(errorMessage);
+      showErrorToast(errorMessage);
       setShow(true);
     }
   };
+  
   const handleDeletePost = async (postId) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/feeds/id/${postId}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/feed/${postId}`,
         {
           method: "DELETE",
+          headers: {
+            ...getAuthorizedHeaders(),
+            // Do not include 'Content-Type', as the browser handles it for FormData
+          },
         }
       );
       if (!response.ok) {
@@ -157,6 +179,7 @@ setLoading(true)
     }
   };
   //Warranty API
+
   const handleUploadwarrenty = async (
     formData,
     setMessage,
@@ -179,19 +202,16 @@ setLoading(true)
       return;
     }
 
-    // Ensure userDetails is available and contains necessary information
-    // if (!userDetails || !userDetails.result || !userDetails.result.id) {
-    //   showErrorToast("User details not found.");
-    //   return;
-    // }
-    const firstName = localStorage.getItem("firstName")
-    // console.log("firstName:", firstName);
-    const lastName = localStorage.getItem("lastName")
-    // console.log("lastName:", lastName);
+   
+    const firstName = localStorage.getItem("firstName");
+   
+    const lastName = localStorage.getItem("lastName");
+    
     if (!firstName && !lastName) {
       showErrorToast("User details not found.");
       return;
     }
+   const userId=localStorage.getItem("userId");
     // Create FormData payload
     const form = new FormData();
     form.append("vendor", formData.vendor);
@@ -205,7 +225,7 @@ setLoading(true)
     form.append("planName", formData.planName);
     form.append("product_price_ids", formData.product_price_ids);
     form.append("other_Details", formData.other_Details);
-
+    form.append("userId",userId);
     // Append file if it exists
     if (formData.file) {
       form.append("file", formData.file);
@@ -216,6 +236,7 @@ setLoading(true)
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/upload`,
         {
           method: "POST",
+          headers:{ ...getAuthorizedHeaders(),},
           body: form,
         }
       );
@@ -245,21 +266,21 @@ setLoading(true)
       setShowAddModal(false);
       showSuccessToast("Upload successful");
     } catch (error) {
-      // setMessage("Error uploading warranty");
-      // showErrorToast("Error uploading warranty: " + error.message);
-      // setShow(true);
+      
     }
   };
 
-
   const handleUpdateWarranty = async (formData) => {
+    
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/${formData.id}`,
         {
+          mode: "cors",
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            ...getAuthorizedHeaders()
           },
           body: JSON.stringify(formData),
         }
@@ -278,6 +299,9 @@ setLoading(true)
         `${process.env.REACT_APP_JAVA_API_URL}/warrenty/${warrantyId}`,
         {
           method: "DELETE",
+          headers: {
+            ...getAuthorizedHeaders()
+          }
         }
       );
       if (!response.ok) {
@@ -296,73 +320,79 @@ setLoading(true)
   const fetchComments = async (feedId) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/${feedId}/comments`
+        `${process.env.REACT_APP_JAVA_API_URL}/comment/${feedId}`,
+        {
+          headers: {
+            ...getAuthorizedHeaders(),
+            // Do not include 'Content-Type', as the browser handles it for FormData
+          },
+        }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch comments");
       }
       const data = await response.json();
-      // console.log(feedId)
-      setPostcomments(data);
-      // console.log(data)
-      
-
+      // Sort comments by createdAt (most recent first)
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setPostcomments(data); // Update state with sorted comments
     } catch (error) {
       showErrorToast("No comment found");
-      // console.log(error)
+      
     }
   };
-
-
-  const createComment = async (postId, commentText) => {
+  
+  const createComment = async (postId, userId, commentText, userName) => {
     try {
-      const userId = localStorage.getItem("userId")
-      // console.log("User ID:", userId);
-      // Construct the request
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/${postId}/${userId}/Melbeez/comment`,
+        `${process.env.REACT_APP_JAVA_API_URL}/comment/${postId}/${userId}/${userName}`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            ...getAuthorizedHeaders(),
+            "Content-Type": "application/json", // Ensure the content type is JSON
           },
           body: JSON.stringify({
-            text: commentText, // Add the comment text in the request body
+            text: commentText, // Pass the comment text in the body
           }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to upload comment");
       }
-
+  
       const data = await response.json();
-      // console.log("Comment uploaded successfully:", data);
+      
       showSuccessToast("Comment added successfully");
+      return data; // Return the created comment data
     } catch (error) {
-      // console.error("Error uploading comment:", error);
+      
       showErrorToast("Failed to add comment");
+      throw error; // Re-throw error for handling in calling function
     }
   };
+  
+  
   const handleDeleteComment = async (feedId, commentId) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/${feedId}/${commentId}/comment`,
+        `${process.env.REACT_APP_JAVA_API_URL}/comment/${feedId}/${commentId}`,
         {
           method: "DELETE",
+          headers: {
+            ...getAuthorizedHeaders(),
+      
+          },
         }
       );
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
-      // setPostcomments((prevPosts) =>
-      //   prevPosts.filter((post) => post.id !== warrantyId)
-      // );
+   
       await fetchComments(feedId);
-      // await fetchSingleFeed(feedId)
+
       showSuccessToast("comment deleted successfully");
-      // console.log(feedId,commentId)
-      // console.log("comment deleted succesfully")
+    
     } catch (error) {
       showErrorToast("Error deleting comment: " + error.message);
     }
@@ -371,63 +401,75 @@ setLoading(true)
   //Like API
   const createLikes = async (feedId) => {
     try {
-      const userId = localStorage.getItem("userId")
-      // console.log("User ID:", userId);
-      // Construct the request
+  
+
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/api/${feedId}/${userId}/Melbeez/like`,
+        `${process.env.REACT_APP_JAVA_API_URL}/like/${feedId}/${userId}/${userName}`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            ...getAuthorizedHeaders()
           },
-
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to add Like");
       }
-
+      const data = await response.json();
+ 
+     
     } catch (error) {
-      // console.error("Error uploading Like:", error);
+   
       showErrorToast("Failed to add Like");
     }
   };
   const fetchLikesdetails = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/api/all/likes`
+        `${process.env.REACT_APP_JAVA_API_URL}/like/all`,
+        {
+          method:"GET",
+          mode: "cors",
+          headers: {
+            ...getAuthorizedHeaders(),
+            // Do not include 'Content-Type', as the browser handles it for FormData
+          },
+        }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch feeds");
       }
       const data = await response.json();
       setLikeDetails(data);
-      // console.log(data)
-      
+     
     } catch (error) {
-      showErrorToast("No feed found");
-      // console.log(error)
+      showErrorToast("No likes found");
+     
     }
   };
- 
-  const fetchTransactionDetails= async () => {
+
+  const fetchTransactionDetails = async () => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/transactions/all`
+        `${process.env.REACT_APP_JAVA_API_URL}/transaction/user/all`,
+        {
+          mode: "cors",
+          headers: {
+            ...getAuthorizedHeaders(),
+          },
+        }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch Transaction Details");
       }
       const data = await response.json();
       setTransactiondata(data);
-      setfilterdata(data)
-      console.log(data)
+      setfilterdata(data);
       
     } catch (error) {
       showErrorToast("No Transaction Details found");
-      console.log(error)
+      
     }
   };
 
@@ -455,13 +497,11 @@ setLoading(true)
         fetchLikesdetails,
         likedetails,
         setLikeDetails,
-        fetchSingleFeed,
         fetchTransactionDetails,
         transactiondata,
         setTransactiondata,
         setfilterdata,
-        filterdata
-        
+        filterdata,
       }}
     >
       {children}

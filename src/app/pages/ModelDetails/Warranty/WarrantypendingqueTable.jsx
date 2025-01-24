@@ -233,13 +233,22 @@ const [loading,setLoading]=useState(false)
       }));
     }
   }, [userDetails, loading, formData.author]);
-
+  const token = localStorage.getItem("authToken");
+  const getAuthorizedHeaders = () => ({
+    authorization: `Bearer ${token}`,
+  });
   const fetchData = async () => {
 
     setLoading(true)
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/warranty/pending`
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/pending`,{
+          
+          method: "GET",
+          headers: {
+            ...getAuthorizedHeaders()
+          },
+        }
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -356,7 +365,11 @@ const [loading,setLoading]=useState(false)
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/${rowData.id}`,
-        { method: "DELETE" }
+        { method: "DELETE",
+          headers: {
+            ...getAuthorizedHeaders()
+          },
+         }
       );
       if (!response.ok) {
         throw new Error("Failed to delete item.");

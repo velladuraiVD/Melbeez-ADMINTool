@@ -23,7 +23,8 @@ export default function PhoneLogs() {
   const searchInputRef = useRef();
   const ExcelCustomName = Cookie.set("exclname", "Phone Logs.csv");
   const [search, setSearch] = useState("");
-  const dispatch = useDispatch(); const [value, setValue] = useState("");
+  const dispatch = useDispatch(); 
+  const [value, setValue] = useState("");
   const [value1, setValue1] = useState("");
   const dateAndTimeFormatter = (cell, row) => {
     let obj = row.createdOn;

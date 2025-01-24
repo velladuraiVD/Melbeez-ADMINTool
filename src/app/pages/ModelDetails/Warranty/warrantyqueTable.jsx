@@ -26,6 +26,10 @@ const WarrantyProductQueueTable = ({
   screen = "",
   isApproved = false,
 }) => {
+  const token = localStorage.getItem("authToken");
+  const getAuthorizedHeaders = () => ({
+    authorization: `Bearer ${token}`,
+  });
   const [warrantyData, setWarrantyData] = useState([]);
   const [loading, setLoading] = useState(true); 
   const [fileError, setFileError] = useState("");
@@ -195,7 +199,11 @@ const WarrantyProductQueueTable = ({
     setLoading(true); // Set loading to true when data fetch starts
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/warranty/all`
+        `${process.env.REACT_APP_JAVA_API_URL}/warranty/all`,{
+          headers: {
+            ...getAuthorizedHeaders()
+          },
+        }
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -274,7 +282,11 @@ const WarrantyProductQueueTable = ({
     try {
       const response = await fetch(
         `${process.env.REACT_APP_JAVA_API_URL}/warranty/${rowData.id}`,
-        { method: "DELETE" }
+        { method: "DELETE",
+          headers: {
+            ...getAuthorizedHeaders()
+          },
+         }
       );
       if (!response.ok) {
         throw new Error("Failed to delete item.");
@@ -353,23 +365,23 @@ const WarrantyProductQueueTable = ({
     }
   };
 
-  const handleSearchChange = (e, column) => {
-    const searchValue = e.target.value.toLowerCase();
-    setSearchTerms((prevSearchTerms) => ({
-      ...prevSearchTerms,
-      [column.dataField]: searchValue,
-    }));
+  // const handleSearchChange = (e, column) => {
+  //   const searchValue = e.target.value.toLowerCase();
+  //   setSearchTerms((prevSearchTerms) => ({
+  //     ...prevSearchTerms,
+  //     [column.dataField]: searchValue,
+  //   }));
 
-    const filtered = warrantyData.filter((item) =>
-      Object.entries(searchTerms).every(([key, value]) =>
-        String(item[key])
-          .toLowerCase()
-          .includes(value)
-      )
-    );
+  //   const filtered = warrantyData.filter((item) =>
+  //     Object.entries(searchTerms).every(([key, value]) =>
+  //       String(item[key])
+  //         .toLowerCase()
+  //         .includes(value)
+  //     )
+  //   );
 
-    setFilteredData(filtered);
-  };
+  //   setFilteredData(filtered);
+  // };
 
   const handleCommonSearchChange = (e) => {
     const searchValue = e.target.value.toLowerCase();
@@ -473,7 +485,7 @@ const WarrantyProductQueueTable = ({
             handleDelete={handleDeleteConfirmation}
             paginate={setCurrentPage}
             searchInputRefs={searchInputRefs}
-            handleSearchChange={handleSearchChange}
+            // handleSearchChange={handleSearchChange}
             // handlePendingSubmission={handlePendingSubmission}
             handleRowClick={handleRowClick} // Pass handleRowClick to the table
           />

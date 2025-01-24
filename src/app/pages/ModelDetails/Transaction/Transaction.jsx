@@ -12,52 +12,61 @@ import { useEffect, useState } from "react";
 import { showErrorToast, showSuccessToast } from "../../../../Utility/toastMsg";
 import * as XLSX from "xlsx";
 import { selectFilter } from "react-bootstrap-table2-filter";
-
+import moment from "moment";
 function Transaction() {
   const [columns] = useState([
-    { dataField: "userId", text: "user ID", headerSortingClasses },
+    { dataField: "userName", text: "user Name", headerSortingClasses },
     { dataField: "email", text: "Email", headerSortingClasses },
-    { dataField: "productName", text: "Product Name", headerSortingClasses },
-    {
-      dataField: "price",
-      text: "Price",
-      headerSortingClasses,
-      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
-    },
-    {
-      dataField: "interval",
-      text: "subscription",
-      headerSortingClasses,
-      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
-    },
     {
       dataField: "phoneNumber",
       text: "Mobile",
       headerSortingClasses,
       formatter: (cell) => `${parseFloat(cell)}%` || "N/A",
     },
+    { dataField: "vendor", text: "Vendor", headerSortingClasses },
+    { dataField: "productName", text: "Product Name", headerSortingClasses },
+   
+   
+    {
+      dataField: "price",
+      text: "Price",
+      headerSortingClasses,
+      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
+    },
+
+    {
+      dataField: "interval",
+      text: "subscription",
+      headerSortingClasses,
+      formatter: (cell) => `$${parseFloat(cell).toFixed(2)}`,
+    },
+   
     {
       dataField: "invoice_status",
       text: "Status",
       headerSortingClasses,
       formatter: (cell) => cell,
     },
+    // { dataField: "transactionId", text: "transactionId", headerSortingClasses },
     {
       dataField: "createdAt",
       text: "subscription Date",
       headerSortingClasses,
       formatter: (cell) => {
-        const date = new Date(cell); // Parse the date string
-        const options = { day: "numeric", month: "short", year: "numeric" }; // Format options
-        return date.toLocaleDateString("en-US", options).replace(",", ""); // Apply format
+        const trimmedCell = cell.slice(0, -5); // Remove the last 5 characters if needed
+        return moment(trimmedCell).format("DD-MM-YYYY"); // Display date in DD-MM-YYYY format directly
       },
     },
   ]);
 
-  const { fetchTransactionDetails,setTransactiondata,transactiondata, loading,setfilterdata, filterdata} = useAuth();
+  const { fetchTransactionDetails, transactiondata, loading,setfilterdata, filterdata} = useAuth();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default 5 items per page
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Default 5 items per page
+  const [commonSearchTerm, setCommonSearchTerm] = useState("");
+  
+  // const [startDate, setStartDate] = useState("");
+  // const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     fetchTransactionDetails();
@@ -66,7 +75,7 @@ function Transaction() {
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = transactiondata.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filterdata.slice(indexOfFirstItem, indexOfLastItem);
 
   // Change page handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -99,6 +108,20 @@ function Transaction() {
     }
   };
 
+  // const handleDateFilter = () => {
+  //   if (!startDate || !endDate) {
+  //     showErrorToast("Please select both start and end dates.");
+  //     return;
+  //   }
+
+  //   const filtered = transactiondata.filter((item) => {
+  //     const itemDate = new Date(item.createdAt);
+  //     return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
+  //   });
+
+  //   setfilterdata(filtered);
+  // };
+
   
   const handleFilter = (e) => {
     const filterValue = e.target.value;
@@ -106,15 +129,34 @@ function Transaction() {
     if (filterValue === "") {
       // If no filter is selected, show all data
      
-      setTransactiondata(transactiondata);
+      setfilterdata(transactiondata);
     } else {
       // Filter the data based on the selected status
       const filtered = transactiondata.filter(
         (item) => item.invoice_status.toLowerCase() === filterValue.toLowerCase()
       );
-      setTransactiondata(filtered);
+      setfilterdata(filtered);
     }
   };
+
+  const handleCommonSearchChange = (e) => {
+    const searchValue = e.target.value.toLowerCase();
+    setCommonSearchTerm(searchValue);
+
+    const filtered = transactiondata.filter((item) =>
+      columns.some((column) =>
+        String(item[column.dataField])
+          .toLowerCase()
+          .includes(searchValue)
+      )
+    );
+
+    setfilterdata(filtered);
+  };
+
+
+
+    
 
   const renderhead = () => {
     return (
@@ -133,16 +175,15 @@ function Transaction() {
           <tr key={index}>
             {columns.map((col) => (
               <td key={col.dataField}>
-                {col.dataField === "interval" ? (
-                  item[col.dataField] === "month" ? "Monthly" : 
-                  item[col.dataField] === "year" ? "Yearly" : item[col.dataField]
-                ) : col.dataField === "invoice_status" ? (
-                  item[col.dataField] === "paid" ? "Payment Successful" : 
-                  item[col.dataField] === "open" ? "Pending" : 
-                  item[col.dataField] === "faied" ? "payment Failed" : item[col.dataField]
-                ) : (
-                  item[col.dataField]
-                )}
+                {col.dataField === "createdAt" ? (
+                // Remove the last 5 characters from createdAt and format the date
+                moment(item[col.dataField].slice(0, -5)).format("DD-MM-YYYY")
+              ) : col.dataField === "interval" ? (
+                item[col.dataField] === "month" ? "Monthly" : 
+                item[col.dataField] === "year" ? "Yearly" : item[col.dataField]
+              ) : (
+                item[col.dataField]
+              )}
               </td>
             ))}
           </tr>
@@ -165,7 +206,7 @@ function Transaction() {
             <div>
               <select
                 name="invoice_statusSelect"
-                id="invoice_status"
+                id="invoice_statusSelect"
                 onChange={handleFilter}
                 style={{
                   height: "38px",
@@ -193,18 +234,40 @@ function Transaction() {
                   type="search"
                   className="form-control"
                   placeholder="Search Transaction..."
+                  onChange={handleCommonSearchChange}
+                  value={commonSearchTerm}
                 />
               </div>
-              <div>
-                <button
+             
+            </div>
+
+
+            {/* <div className="d-flex align-items-center ml-2">
+              <input
+                type="date"
+                className="form-control mr-2"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <input
+                type="date"
+                className="form-control mr-2"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+             
+              <button
                   type="button"
                   className="btn btn-primary ml-2 mr-1"
                   title="Search"
+                  onClick={handleDateFilter}
                 >
                   <i className="fas fa-search"></i>
                 </button>
-              </div>
-            </div>
+            </div> */}
+
+            
+                
             <div className="d-flex">
               <div>
                 <button
@@ -259,6 +322,8 @@ function Transaction() {
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
+             
+
                   </select>
                 </div>
                 {/* Pagination centered */}

@@ -1,39 +1,61 @@
-import React, { useState } from "react";
+/* eslint-disable jsx-a11y/img-redundant-alt */
+import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import { toAbsoluteUrl } from "../../../../_metronic/_helpers";
 import SVG from "react-inlinesvg";
 
-// import "./FeedCard.css";
-const FeedPost = ({ post,isLiked,  createLikes ,onplay,  playingVideoId, setPlayingVideoId,  handleCommentClick, 
-    calculatePostAge,
-    handleDeleteClick,
-    preventLinkDefault,}) => {
-        const [likeCount, setLikeCount] = useState(post.likesCount);
-        const [liked, setLiked] = useState(isLiked);
-        const handleLikeClick = async () => {
-          const newLikeCount = liked ? likeCount - 1 : likeCount + 1;
-          setLikeCount(newLikeCount);
-          setLiked(!liked);
-          try {
-            await createLikes(post.id); // Update like status in backend
-          } catch (error) {
-            // console.error("Error updating likes:", error);
-            // Revert the like state and count in case of error
-            setLikeCount(likeCount);
-            setLiked(liked);
-          }
-        };
+const FeedPost = ({
+  post,
+  createLikes,
+  onPlay,
+  isLiked,
+  playingVideoId,
+  setPlayingVideoId,
+  handleCommentClick,
+  calculatePostAge,
+  onDelete,
+  preventLinkDefault,
+  commentCount
+}) => {
+  // Initialize local state for like count and liked status
+  const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [isLikeds, setIsLiked] = useState(isLiked ||  false); // Assume post.isLiked is provided
+
+  // Effect to update local liked status if it changes in props
+  useEffect(() => {
+    setIsLiked(isLiked);
+    setLikeCount(post.likesCount); // Update like count if it changes in props
+  }, [isLiked, post]);
+
+  const handleLikeClick = async () => {
+    // Calculate new like count based on current like status
+    const newLikeCount = isLikeds ? likeCount - 1 : likeCount + 1;
+
+    // Optimistically update UI
+    setLikeCount(newLikeCount);
+    setIsLiked(!isLikeds); // Toggle isLiked state
+
+    try {
+      // Call backend to update like status
+      await createLikes(post.id);
+    } catch (error) {
+      console.error("Error updating likes:", error);
+      // Revert changes if there's an error
+      setLikeCount(isLikeds ? newLikeCount + 1 : newLikeCount - 1);
+      setIsLiked(isLikeds); // Revert isLiked state
+    }
+  };
 
   return (
-    <div key={post.id} >
+    <div key={post.id}>
       <Card className="feed-card">
-        <div style={{ padding: "15px 15px 5px 10px" }}>
+        <div style={{ padding: "15px" }}>
           <div className="card-header-custom">
             <div className="header-left">
               <img
-                 src={toAbsoluteUrl("/media/logos/logo-light.png")}
-                   alt="Avatar"
-        className="avatar bg-dark"
+                src={toAbsoluteUrl("/media/logos/logo-light.png")}
+                alt="Avatar"
+                className="avatar bg-dark"
               />
               <h6>{post.author}</h6>
             </div>
@@ -55,18 +77,13 @@ const FeedPost = ({ post,isLiked,  createLikes ,onplay,  playingVideoId, setPlay
               objectFit: "contain",
               background: "#1A1A27",
             }}
-            onClick={onplay}
-            // onPause={() => {
-            //   if (playingVideoId === post.id) {
-            //     setPlayingVideoId(null); // Reset playing video on pause
-            //   }
-            // }}
+            onClick={onPlay}
             onPlay={() => {
               if (playingVideoId !== post.id) {
                 setPlayingVideoId(post.id); // Set the current video as playing
               }
             }}
-            autoPlay={playingVideoId === post.id} // Only autoplay if
+            autoPlay={playingVideoId === post.id}
           />
         ) : (
           <img
@@ -87,56 +104,58 @@ const FeedPost = ({ post,isLiked,  createLikes ,onplay,  playingVideoId, setPlay
         </Card.Body>
         <Card.Footer className="card-footer-custom">
           <div>
+            {/* Like Button */}
             <button
               title="Like"
               className={`btn btn-icon btn-md mr-2 p-2`}
               onClick={handleLikeClick}
             >
               <span
-                className={`svg-icon svg-icon-md ${liked ? "svg-icon-danger" : "svg-icon-warning"}`}
+                className={`svg-icon svg-icon-md ${isLikeds ? "svg-icon-danger" : "svg-icon-warning"}`}
               >
-                <SVG title="like"src={toAbsoluteUrl("/media/svg/icons/General/Heart.svg")} />
+                <SVG title="like" src={toAbsoluteUrl("/media/svg/icons/General/Heart.svg")} />
               </span>
               <span className="d-block p-1">{likeCount}</span>
             </button>
+
+            {/* Comment Button */}
             <button
-                title="Comment"
-                className="btn btn-icon btn-md mr-2 p-2"
-                onClick={(e) => {
-                    preventLinkDefault(e);
-                    // Pause the video if it's playing
-                    if (playingVideoId === post.id) {
-                      const videoElement = document.querySelector(`video[src="${post.link}"]`);
-                      if (videoElement) {
-                        videoElement.pause();
-                      }
-                      setPlayingVideoId(null); // Reset playing video state
-                    }
-                    handleCommentClick(post);
-                  }}
-              >
-                <span className="svg-icon svg-icon-md svg-icon-warning d-block">
-                  <SVG
-                  title="comment"
-                    src={toAbsoluteUrl("/media/svg/icons/General/comment.svg")}
-                  />
-                </span>
-                <span className="d-block p-1">{post.commentCount}</span>
-              </button>
-            </div>
-            {/* Delete Button */}
-              <button
-                title="Delete Post"
-                className="btn btn-icon btn-light btn-sm mr-2"
-                onClick={() => handleDeleteClick(post, "post")}
-              >
-                <span className="svg-icon svg-icon-md svg-icon-danger">
-                  <SVG src={toAbsoluteUrl("/media/svg/icons/General/Trash.svg")} />
-                </span>
-              </button>
+              title="Comment"
+              className="btn btn-icon btn-md mr-2 p-2"
+              onClick={(e) => {
+                preventLinkDefault(e);
+                if (playingVideoId === post.id) {
+                  const videoElement = document.querySelector(`video[src="${post.link}"]`);
+                  if (videoElement) {
+                    videoElement.pause();
+                  }
+                  setPlayingVideoId(null); // Reset playing video state
+                }
+                handleCommentClick(post)
+                
+              }}
+            >
+              <span className="svg-icon svg-icon-md svg-icon-warning d-block">
+                <SVG title="comment" src={toAbsoluteUrl("/media/svg/icons/General/comment.svg")} />
+              </span>
+              <span className="d-block p-1">{commentCount}</span>
+            </button>
+          </div>
+
+          {/* Delete Button */}
+          <button
+            title="Delete Post"
+            className="btn btn-icon btn-light btn-sm mr-2"
+            onClick={() => onDelete(post, "post")}
+          >
+            <span className="svg-icon svg-icon-md svg-icon-danger">
+              <SVG src={toAbsoluteUrl("/media/svg/icons/General/Trash.svg")} />
+            </span>
+          </button>
         </Card.Footer>
       </Card>
     </div>
   );
 };
+
 export default FeedPost;
