@@ -64,9 +64,6 @@ function Transaction() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Default 5 items per page
   const [commonSearchTerm, setCommonSearchTerm] = useState("");
-  
-  // const [startDate, setStartDate] = useState("");
-  // const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     fetchTransactionDetails();
@@ -107,20 +104,6 @@ function Transaction() {
       // console.error("Export to Excel error:", error);
     }
   };
-
-  // const handleDateFilter = () => {
-  //   if (!startDate || !endDate) {
-  //     showErrorToast("Please select both start and end dates.");
-  //     return;
-  //   }
-
-  //   const filtered = transactiondata.filter((item) => {
-  //     const itemDate = new Date(item.createdAt);
-  //     return itemDate >= new Date(startDate) && itemDate <= new Date(endDate);
-  //   });
-
-  //   setfilterdata(filtered);
-  // };
 
   
   const handleFilter = (e) => {
@@ -185,6 +168,7 @@ function Transaction() {
                 item[col.dataField]
               )}
               </td>
+             
             ))}
           </tr>
         ))}
@@ -242,30 +226,7 @@ function Transaction() {
             </div>
 
 
-            {/* <div className="d-flex align-items-center ml-2">
-              <input
-                type="date"
-                className="form-control mr-2"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-              <input
-                type="date"
-                className="form-control mr-2"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-             
-              <button
-                  type="button"
-                  className="btn btn-primary ml-2 mr-1"
-                  title="Search"
-                  onClick={handleDateFilter}
-                >
-                  <i className="fas fa-search"></i>
-                </button>
-            </div> */}
-
+           
             
                 
             <div className="d-flex">

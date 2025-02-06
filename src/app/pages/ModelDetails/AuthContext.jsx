@@ -344,7 +344,7 @@ export const AuthProvider = ({ children }) => {
   const createComment = async (postId, userId, commentText, userName) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_JAVA_API_URL}/comment/${postId}/${userId}/${userName}`,
+        `${process.env.REACT_APP_JAVA_API_URL}/comment/post/${postId}/${userId}/${userName}`,
         {
           method: "POST",
           headers: {
@@ -472,6 +472,8 @@ export const AuthProvider = ({ children }) => {
       
     }
   };
+
+  
 
   return (
     <AuthContext.Provider

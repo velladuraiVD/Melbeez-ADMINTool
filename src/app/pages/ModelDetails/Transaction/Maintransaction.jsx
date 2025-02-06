@@ -6,9 +6,7 @@ function Maintransaction() {
   return (
     <>
     <AuthProvider>
-      <Transaction
-       
-      />
+      <Transaction/>
     </AuthProvider>
   </>
   )
